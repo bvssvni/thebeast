@@ -14,11 +14,14 @@ var thebeast_settings = {
 	"renderInterval": 25,
 	"playerColor": [0, 0, 255, 255],
 	"box1Color": [255, 0, 0, 255],
+	"tree1Color": [0, 255, 0, 255],
+	"units": 64,
 };
 var thebeast_images = null;
 var thebeast_image_sources = {
 	"thebeast-front": "./images/thebeast-front.png",
 	"box1": "./images/box1.png",
+	"tree1": "./images/tree1.png",
 };
 var thebeast_scene = null;
 
@@ -190,7 +193,8 @@ function thebeast_loadMap(scene, map)
 	
 	var box1Color = thebeast_getSetting("box1Color");
 	var playerColor = thebeast_getSetting("playerColor");
-	var units = 64;
+	var tree1Color = thebeast_getSetting("tree1Color");
+	var units = thebeast_getSetting("units");
 	for (var x = 0; x < w; x++)
 	{
 		for (var y = 0; y < h; y++)
@@ -205,6 +209,10 @@ function thebeast_loadMap(scene, map)
 			{
 				var player = thebeast_newObject("theBeast", x * units, y * units, 0, 0);
 				scene.players.push(player);
+			}
+			else if (thebeast_compareColors(tree1Color, color))
+			{
+				scene.objects.push(thebeast_newObject("tree1", x * units, y * units, 0, 0));
 			}
 		}
 	}
@@ -289,15 +297,21 @@ function thebeast_drawObject(context, obj)
 	if (typeof context !== "object") {console.log(typeof context);}
 	if (typeof obj !== "object") {console.log(typeof obj);}
 	
+	var units = thebeast_getSetting("units");
 	if (obj.type === "theBeast")
 	{
 		var image = thebeast_getImage("thebeast-front");
-		context.drawImage(image, obj.x, obj.y, 64, 64);
+		context.drawImage(image, obj.x, obj.y, units, units);
 	}
-	if (obj.type === "box1")
+	else if (obj.type === "box1")
 	{
 		var image = thebeast_getImage("box1");
-		context.drawImage(image, obj.x, obj.y, 64, 64);
+		context.drawImage(image, obj.x, obj.y, units, units);
+	}
+	else if (obj.type === "tree1")
+	{
+		var image = thebeast_getImage("tree1");
+		context.drawImage(image, obj.x, obj.y, units, units);
 	}
 }
 
