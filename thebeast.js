@@ -66,19 +66,20 @@ var thebeast_actions = {
 		return false;
 	},
 	followWithSpeed: function(obj, args) {
-		// target, speed.
+		// target, speed, callback.
 		if (typeof args.target !== "object") {console.log(typeof args.target);}
 		if (typeof args.speed !== "number") {console.log(typeof args.speed);}
+		if (typeof args.callback !== "function") {console.log(typeof args.callback);}
 		
 		var dx = args.target.x - obj.x;
 		var dy = args.target.y - obj.y;
 		var d = Math.sqrt(dx * dx + dy * dy);
-		if (d === 0) {return true;}
+		if (d === 0) {return args.callback(args.target);}
 		
 		var speed = Math.min(args.speed, d);
 		obj.x += dx * speed / d;
 		obj.y += dy * speed / d;
-		return false;
+		return args.callback(args.target);
 	},
 	sendMessage: function(obj, args) {
 		// target, title, message.
@@ -437,13 +438,14 @@ function thebeast_moveWithSpeed(obj, speed, x, y)
 	obj.actions.push({name: "moveWithSpeed", x: x, y: y, speed: speed});
 }
 
-function thebeast_followWithSpeed(obj, speed, target)
+function thebeast_followWithSpeed(obj, speed, target, callback)
 {
 	if (typeof obj !== "object") {console.log(typeof obj);}
 	if (typeof speed !== "number") {console.log(typeof speed);}
 	if (typeof target !== "object") {console.log(typeof target);}
+	if (typeof callback !== "function") {console.log(typeof callback);}
 	
-	obj.actions.push({name: "followWithSpeed", target: target, speed: speed});
+	obj.actions.push({name: "followWithSpeed", target: target, speed: speed, callback: callback});
 }
 
 function thebeast_wait(obj, dt)
@@ -505,8 +507,13 @@ var thebeast = function()
 		thebeast_sendMessage(player, camera, "follow me", {target: player});
 		
 		thebeast_waitForMessage(camera, "follow me", function(msg) {
-			thebeast_followWithSpeed(camera, 1, msg.target);
+			thebeast_followWithSpeed(camera, 0.2, msg.target, function(target) {
+				return false;
+			});
 		});
+		
+		thebeast_wait(player, 100);
+		thebeast_moveWithSpeed(player, 1, 20, 20);
 	});
 	
 	// Set rendering settings.
