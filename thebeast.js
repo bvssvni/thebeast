@@ -37,13 +37,25 @@ var thebeast_actions = {
 		if (typeof args.y !== "number") {console.log(typeof args.y);}
 		if (args.dt === 0) {return true;}
 		
+		obj.x += (args.x - obj.x) / args.dt;
+		obj.y += (args.y - obj.y) / args.dt;
+		args.dt--;
+		return false;
+	},
+	moveWithSpeed: function(obj, args) {
+		// x, y, speed.
+		if (typeof args.x !== "number") {console.log(typeof args.x);}
+		if (typeof args.y !== "number") {console.log(typeof args.y);}
+		if (typeof args.speed !== "number") {console.log(typeof args.speed);}
+		
 		var dx = args.x - obj.x;
 		var dy = args.y - obj.y;
-		dx /= args.dt;
-		dy /= args.dt;
-		obj.x += dx;
-		obj.y += dy;
-		args.dt--;
+		var d = Math.sqrt(dx * dx + dy * dy);
+		if (d === 0) {return true;}
+		
+		var speed = Math.min(args.speed, d);
+		obj.x += dx * speed / d;
+		obj.y += dy * speed / d;
 		return false;
 	},
 }
@@ -193,9 +205,6 @@ function thebeast_moveObject(obj)
 	
 	if (actions.length > 0)
 	{
-		// TEST
-		console.log(actions.length);
-	
 		var action = actions[0];
 		var name = action.name;
 		if (typeof name !== "string") {console.log(typeof name);}
@@ -349,6 +358,16 @@ function thebeast_movePosition(obj, dt, x, y)
 	obj.actions.push({name: "movePosition", dt: dt, x: x, y: y});
 }
 
+function thebeast_moveWithSpeed(obj, speed, x, y)
+{
+	if (typeof obj !== "object") {console.log(typeof obj);}
+	if (typeof speed !== "number") {console.log(typeof speed);}
+	if (typeof x !== "number") {console.log(typeof x);}
+	if (typeof y !== "number") {console.log(typeof y);}
+	
+	obj.actions.push({name: "moveWithSpeed", x: x, y: y, speed: speed});
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -362,8 +381,8 @@ var thebeast = function()
 	function() {
 		// Onload.
 		var player = scene.players[0];
-		thebeast_movePosition(player, 100, 100, 100);
-		thebeast_movePosition(player, 100, 200, 100);
+		thebeast_moveWithSpeed(player, 1, 100, 100);
+		thebeast_moveWithSpeed(player, 1, 200, 100);
 	});
 	
 	// Set rendering settings.
