@@ -3,9 +3,11 @@ var thebeast_settings = {
 	"boxId": "box",
 	"moveInterval": 10,
 	"renderInterval": 25,
+	"box1Color": [255, 0, 0, 255],
 };
 var thebeast_images = null;
 var thebeast_image_sources = {
+	"map": "./images/map.png",
 	"thebeast-front": "./images/thebeast-front.png",
 	"box1": "./images/box1.png",
 };
@@ -52,6 +54,48 @@ function thebeast_loadImages(sources, callback)
 			}
 		};
 		images[src].src = sources[src];
+	}
+}
+
+function thebeast_compareColors(a, b)
+{
+	return a[0] === b[0] &&
+		a[1] === b[1] &&
+		a[2] === b[2] &&
+		a[3] === b[3];
+}
+
+function thebeast_loadMap(scene)
+{
+	var map = thebeast_getImage("map");
+	var w = map.width;
+	var h = map.height;
+	
+	var canvas = document.createElement("canvas");
+	if (canvas === null) {console.log("canvas is null");}
+	canvas.width = w;
+	canvas.height = h;
+	var context = canvas.getContext('2d');
+	if (context === null) {console.log("context is null");}
+	thebeast_setSmoothing(context, false);
+	context.drawImage(map, 0, 0);
+	
+	var data = context.getImageData(0, 0, w, h).data;
+	if (data === null) {console.log("data is null");}
+	
+	var box1Color = thebeast_getSetting("box1Color");
+	var units = 64;
+	for (var x = 0; x < w; x++)
+	{
+		for (var y = 0; y < h; y++)
+		{
+			var i = x + w * y;
+			var color = [data[i*4+0], data[i*4+1], data[i*4+2], data[i*4+3]];
+			if (thebeast_compareColors(box1Color, color))
+			{
+				scene.objects.push(thebeast_newObject("box1", x * units, y * units, 0, 0));
+			}
+		}
 	}
 }
 
@@ -174,7 +218,7 @@ var thebeast = function()
 	var player = thebeast_newObject("theBeast", 0, 0, 1, 0);
 	var objects = [
 		player,
-		thebeast_newObject("box1", 0, 0, 0, 0),
+		// thebeast_newObject("box1", 0, 0, 0, 0),
 	];
 	scene.objects = objects;
 	
@@ -191,6 +235,10 @@ var thebeast = function()
 	var imageSources = thebeast_image_sources;
 	thebeast_loadImages(imageSources, function(images) {
 		thebeast_images = images;
+		
+		// Load objects from map.
+		thebeast_loadMap(scene);
+		
 		scene.loaded = true;
 	});
 	
