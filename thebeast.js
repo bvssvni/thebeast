@@ -65,6 +65,21 @@ var thebeast_actions = {
 		obj.y += dy * speed / d;
 		return false;
 	},
+	followWithSpeed: function(obj, args) {
+		// target, speed.
+		if (typeof args.target !== "object") {console.log(typeof args.target);}
+		if (typeof args.speed !== "number") {console.log(typeof args.speed);}
+		
+		var dx = args.target.x - obj.x;
+		var dy = args.target.y - obj.y;
+		var d = Math.sqrt(dx * dx + dy * dy);
+		if (d === 0) {return true;}
+		
+		var speed = Math.min(args.speed, d);
+		obj.x += dx * speed / d;
+		obj.y += dy * speed / d;
+		return false;
+	},
 }
 
 function thebeast_getSetting(id)
@@ -270,7 +285,9 @@ function thebeast_render(canvas, context, scene)
 	if (scene.cameras.length > cameraIndex)
 	{
 		var camera = scene.cameras[cameraIndex];
-		context.translate(camera.x, camera.y);
+		var x = Math.floor(camera.x);
+		var y = Math.floor(camera.y);
+		context.translate(x, y);
 	}
 
 	// Draw objects
@@ -395,6 +412,15 @@ function thebeast_moveWithSpeed(obj, speed, x, y)
 	obj.actions.push({name: "moveWithSpeed", x: x, y: y, speed: speed});
 }
 
+function thebeast_followWithSpeed(obj, speed, target)
+{
+	if (typeof obj !== "object") {console.log(typeof obj);}
+	if (typeof speed !== "number") {console.log(typeof speed);}
+	if (typeof target !== "object") {console.log(typeof target);}
+	
+	obj.actions.push({name: "followWithSpeed", target: target, speed: speed});
+}
+
 function thebeast_wait(obj, dt)
 {
 	if (typeof obj !== "object") {console.log(typeof obj);}
@@ -428,10 +454,12 @@ var thebeast = function()
 		// Add camera.
 		thebeast_addCamera(scene, 0, 0);
 		var camera = scene.cameras[0];
-		thebeast_wait(camera, 100);
-		thebeast_movePosition(camera, 100, 100, 100);
-		
 		var player = scene.players[0];
+		
+		thebeast_wait(camera, 200);
+		// thebeast_movePosition(camera, 100, 100, 100);
+		thebeast_followWithSpeed(camera, 0.1, player);
+		
 		thebeast_moveWithSpeed(player, 1, 100, 100);
 		thebeast_moveWithSpeed(player, 1, 200, 100);
 	});
