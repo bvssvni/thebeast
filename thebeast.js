@@ -128,6 +128,7 @@ function thebeast_newScene(map, onload)
 		"players": [],
 		"map": map,
 		"onload": onload,
+		"time": 0,
 	};
 }
 
@@ -218,6 +219,8 @@ function thebeast_physics(scene)
 			var obj = objects[i];
 			thebeast_moveObject(obj);
 		}
+		
+		scene.time++;
 	}, thebeast_getSetting("moveInterval"));
 }
 
