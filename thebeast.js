@@ -30,6 +30,13 @@ var thebeast_actions = {
 		
 		return true;
 	},
+	wait: function(obj, args) {
+		// dt.
+		if (typeof args.dt !== "number") {console.log(typeof args.dt);}
+		if (args.dt > 0) {args.dt--; return false;}
+		
+		return true;
+	},
 	movePosition: function(obj, args) {
 		// dt, x, y.
 		if (typeof args.dt !== "number") {console.log(typeof args.dt);}
@@ -388,6 +395,14 @@ function thebeast_moveWithSpeed(obj, speed, x, y)
 	obj.actions.push({name: "moveWithSpeed", x: x, y: y, speed: speed});
 }
 
+function thebeast_wait(obj, dt)
+{
+	if (typeof obj !== "object") {console.log(typeof obj);}
+	if (typeof dt !== "number") {console.log(typeof dt);}
+	
+	obj.actions.push({name: "wait", dt: dt});
+}
+
 function thebeast_addCamera(scene, x, y)
 {
 	if (typeof scene !== "object") {console.log(typeof scene);}
@@ -413,6 +428,7 @@ var thebeast = function()
 		// Add camera.
 		thebeast_addCamera(scene, 0, 0);
 		var camera = scene.cameras[0];
+		thebeast_wait(camera, 100);
 		thebeast_movePosition(camera, 100, 100, 100);
 		
 		var player = scene.players[0];
