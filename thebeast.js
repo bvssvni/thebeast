@@ -101,7 +101,7 @@ function thebeast_loadMap(scene, map)
 			else if (thebeast_compareColors(playerColor, color))
 			{
 				var player = thebeast_newObject("theBeast", x * units, y * units, 0, 0);
-				scene.objects.push(player);
+				scene.players.push(player);
 			}
 		}
 	}
@@ -122,6 +122,7 @@ function thebeast_newScene(map)
 		"loadedImages": false,
 		"loaded": false,
 		"objects": [],
+		"players": [],
 		"map": map,
 	};
 }
@@ -168,10 +169,12 @@ function thebeast_drawObject(context, obj)
 	}
 }
 
-function thebeast_render(canvas, context, objs)
+function thebeast_render(canvas, context, scene)
 {
 	if (typeof canvas !== "object") {console.log(typeof canvas);}
 	if (typeof context !== "object") {console.log(typeof context);}
+	if (typeof scene !== "object") {console.log(typeof scene);}
+	var objs = scene.objects;
 	if (typeof objs !== "object") {console.log(typeof objs);}
 
 	// Clear buffer.
@@ -179,10 +182,19 @@ function thebeast_render(canvas, context, objs)
 	var h = canvas.height;
 	context.clearRect(0, 0, w, h);
 
+	// Draw objects
 	var n = objs.length;
 	for (var i = 0; i < n; i++)
 	{
 		thebeast_drawObject(context, objs[i]);
+	}
+	
+	// Draw players.
+	n = scene.players.length;
+	for (var i = 0; i < n; i++)
+	{
+		var player = scene.players[i];
+		thebeast_drawObject(context, player);
 	}
 }
 
@@ -215,7 +227,7 @@ function thebeast_graphics(canvas, context, scene)
 		var loaded = scene.loaded;
 		if (!loaded) {return;}
 		
-		thebeast_render(canvas, context, scene.objects);
+		thebeast_render(canvas, context, scene);
 	}, thebeast_getSetting("renderInterval"));
 }
 
