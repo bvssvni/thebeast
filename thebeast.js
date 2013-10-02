@@ -105,6 +105,8 @@ function thebeast_loadMap(scene, map)
 			}
 		}
 	}
+	
+	scene.onload();
 }
 
 function thebeast_setSmoothing(context, val)
@@ -113,9 +115,10 @@ function thebeast_setSmoothing(context, val)
 	else {console.log("Smoothing property not supported for browser");}
 }
 
-function thebeast_newScene(map)
+function thebeast_newScene(map, onload)
 {
-	if (typeof map !== "string") {console.log("map is not string");}
+	if (typeof map !== "string") {console.log(typeof map);}
+	if (typeof onload !== "function") {console.log(typeof onload);}
 
 	return {
 		"loadedMap": false,
@@ -124,6 +127,7 @@ function thebeast_newScene(map)
 		"objects": [],
 		"players": [],
 		"map": map,
+		"onload": onload,
 	};
 }
 
@@ -265,7 +269,10 @@ var thebeast = function()
 	if (typeof context !== "object") {console.log(typeof context);}
 	
 	// Load objects.
-	var scene = thebeast_newScene("./images/map.png");
+	var scene = thebeast_newScene("./images/map.png",
+	function() {
+		// Onload.
+	});
 	
 	// Set rendering settings.
 	thebeast_setSmoothing(context, false);
