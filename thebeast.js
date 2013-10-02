@@ -16,6 +16,9 @@ function thebeast_getSetting(id)
 
 function thebeast_loadImages(sources, callback)
 {
+	if (sources === null) {console.log("sources is null");}
+	if (callback === null) {console.log("callback is null");}
+
 	var images = {};
 	var loadedImages = 0;
 	var numImages = Object.keys(sources).length;
@@ -37,12 +40,9 @@ var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
 	var canvas = document.getElementById(boxId);
-	if (canvas === null)
-	{
-		console.log("canvas is null");
-	}
-	
+	if (canvas === null) {console.log("canvas is null");}
 	var context = canvas.getContext('2d');
+	if (context === null) {console.log("context is null");}
 	
 	var imageSources = {
 		"thebeast-front": "./images/thebeast-front.png"
