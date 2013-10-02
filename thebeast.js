@@ -14,18 +14,38 @@ var thebeast_image_sources = {
 var thebeast_scene = null;
 
 // These are actions that can be performed on objects.
+// An action returns true when it is completed.
+// Each object has a list of actions.
+// If there is no actions, objects move with their velocity.
 var thebeast_actions = {
-	"setPosition": function(obj, args) {
+	setPosition: function(obj, args) {
 		// dt, x, y.
-		if (args.dt > 0) {args.dt--; return false;}
+		if (typeof args.dt !== "number") {console.log(typeof args.dt);}
 		if (typeof args.x !== "number") {console.log(typeof args.x);}
 		if (typeof args.y !== "number") {console.log(typeof args.y);}
+		if (args.dt > 0) {args.dt--; return false;}
 		
 		obj.x = args.x;
 		obj.y = args.y;
 		
 		return true;
-	}
+	},
+	movePosition: function(obj, args) {
+		// dt, x, y.
+		if (typeof args.dt !== "number") {console.log(typeof args.dt);}
+		if (typeof args.x !== "number") {console.log(typeof args.x);}
+		if (typeof args.y !== "number") {console.log(typeof args.y);}
+		if (args.dt === 0) {return true;}
+		
+		var dx = args.x - obj.x;
+		var dy = args.y - obj.y;
+		dx /= args.dt;
+		dy /= args.dt;
+		obj.x += dx;
+		obj.y += dy;
+		args.dt--;
+		return false;
+	},
 }
 
 function thebeast_getSetting(id)
@@ -319,6 +339,16 @@ function thebeast_setPosition(obj, dt, x, y)
 	obj.actions.push({name: "setPosition", dt: dt, x: x, y: y});
 }
 
+function thebeast_movePosition(obj, dt, x, y)
+{
+	if (typeof obj !== "object") {console.log(typeof obj);}
+	if (typeof dt !== "number") {console.log(typeof dt);}
+	if (typeof x !== "number") {console.log(typeof x);}
+	if (typeof y !== "number") {console.log(typeof y);}
+	
+	obj.actions.push({name: "movePosition", dt: dt, x: x, y: y});
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -332,8 +362,8 @@ var thebeast = function()
 	function() {
 		// Onload.
 		var player = scene.players[0];
-		thebeast_setPosition(player, 100, 100, 100);
-		thebeast_setPosition(player, 100, 200, 100);
+		thebeast_movePosition(player, 100, 100, 100);
+		thebeast_movePosition(player, 100, 200, 100);
 	});
 	
 	// Set rendering settings.
