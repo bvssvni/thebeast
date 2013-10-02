@@ -3,11 +3,11 @@ var thebeast_settings = {
 	"boxId": "box",
 	"moveInterval": 10,
 	"renderInterval": 25,
+	"playerColor": [0, 0, 255, 255],
 	"box1Color": [255, 0, 0, 255],
 };
 var thebeast_images = null;
 var thebeast_image_sources = {
-	"map": "./images/map.png",
 	"thebeast-front": "./images/thebeast-front.png",
 	"box1": "./images/box1.png",
 };
@@ -86,6 +86,7 @@ function thebeast_loadMap(scene, map)
 	if (typeof data !== "object") {console.log(typeof data);}
 	
 	var box1Color = thebeast_getSetting("box1Color");
+	var playerColor = thebeast_getSetting("playerColor");
 	var units = 64;
 	for (var x = 0; x < w; x++)
 	{
@@ -96,6 +97,11 @@ function thebeast_loadMap(scene, map)
 			if (thebeast_compareColors(box1Color, color))
 			{
 				scene.objects.push(thebeast_newObject("box1", x * units, y * units, 0, 0));
+			}
+			else if (thebeast_compareColors(playerColor, color))
+			{
+				var player = thebeast_newObject("theBeast", x * units, y * units, 0, 0);
+				scene.objects.push(player);
 			}
 		}
 	}
@@ -115,7 +121,7 @@ function thebeast_newScene(map)
 		"loadedMap": false,
 		"loadedImages": false,
 		"loaded": false,
-		"objects": {},
+		"objects": [],
 		"map": map,
 	};
 }
@@ -248,12 +254,6 @@ var thebeast = function()
 	
 	// Load objects.
 	var scene = thebeast_newScene("./images/map.png");
-	var player = thebeast_newObject("theBeast", 0, 0, 1, 0);
-	var objects = [
-		player,
-		// thebeast_newObject("box1", 0, 0, 0, 0),
-	];
-	scene.objects = objects;
 	
 	// Set rendering settings.
 	thebeast_setSmoothing(context, false);
