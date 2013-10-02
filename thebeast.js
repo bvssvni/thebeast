@@ -141,6 +141,20 @@ function thebeast_physics(scene)
 	}, thebeast_getSetting("moveInterval"));
 }
 
+function thebeast_graphics(canvas, context, scene)
+{
+	if (canvas === null) {console.log("canvas is null");}
+	if (context === null) {console.log("context is null");}
+	if (scene === null) {console.log("scene is null");}
+	
+	setInterval(function() {
+		var loaded = scene.loaded;
+		if (!loaded) {return;}
+		
+		thebeast_render(canvas, context, scene.objects);
+	}, thebeast_getSetting("renderInterval"));
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -162,13 +176,8 @@ var thebeast = function()
 	var loaded = false;
 	thebeast_physics(scene);
 	
-	// Rendering.
-	setInterval(function() {
-		var loaded = scene.loaded;
-		if (!loaded) {return;}
-		
-		thebeast_render(canvas, context, scene.objects);
-	}, thebeast_getSetting("renderInterval"));
+	// Graphics.
+	thebeast_graphics(canvas, context, scene);
 	
 	var imageSources = thebeast_image_sources;
 	thebeast_loadImages(imageSources, function(images) {
