@@ -173,6 +173,8 @@ function thebeast_newScene(map, onload)
 		"loaded": false,
 		"objects": [],
 		"players": [],
+		"camera": 0,
+		"cameras": [],
 		"map": map,
 		"onload": onload,
 		"time": 0,
@@ -254,6 +256,15 @@ function thebeast_render(canvas, context, scene)
 	var w = canvas.width;
 	var h = canvas.height;
 	context.clearRect(0, 0, w, h);
+	context.save();
+	
+	// Apply camera position.
+	var cameraIndex = scene.camera;
+	if (scene.cameras.length > cameraIndex)
+	{
+		var camera = scene.cameras[cameraIndex];
+		context.translate(camera.x, camera.y);
+	}
 
 	// Draw objects
 	var n = objs.length;
@@ -269,6 +280,8 @@ function thebeast_render(canvas, context, scene)
 		var player = scene.players[i];
 		thebeast_drawObject(context, player);
 	}
+	
+	context.restore();
 }
 
 function thebeast_physics(scene)
@@ -293,6 +306,13 @@ function thebeast_physics(scene)
 		{
 			var player = scene.players[i];
 			thebeast_moveObject(player);
+		}
+		
+		n = scene.cameras.length;
+		for (var i = 0; i < n; i++)
+		{
+			var camera = scene.cameras[i];
+			thebeast_moveObject(camera);
 		}
 		
 		scene.time++;
@@ -368,6 +388,16 @@ function thebeast_moveWithSpeed(obj, speed, x, y)
 	obj.actions.push({name: "moveWithSpeed", x: x, y: y, speed: speed});
 }
 
+function thebeast_addCamera(scene, x, y)
+{
+	if (typeof scene !== "object") {console.log(typeof scene);}
+	if (typeof x !== "number") {console.log(typeof x);}
+	if (typeof y !== "number") {console.log(typeof y);}
+	
+	scene.cameras.push(thebeast_newObject("camera", x, y, 0, 0));
+	return scene.cameras.length - 1;
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -380,6 +410,11 @@ var thebeast = function()
 	var scene = thebeast_newScene("./images/map.png",
 	function() {
 		// Onload.
+		// Add camera.
+		thebeast_addCamera(scene, 0, 0);
+		var camera = scene.cameras[0];
+		thebeast_movePosition(camera, 100, 100, 100);
+		
 		var player = scene.players[0];
 		thebeast_moveWithSpeed(player, 1, 100, 100);
 		thebeast_moveWithSpeed(player, 1, 200, 100);
