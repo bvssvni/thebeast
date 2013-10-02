@@ -65,9 +65,11 @@ function thebeast_compareColors(a, b)
 		a[3] === b[3];
 }
 
-function thebeast_loadMap(scene)
+function thebeast_loadMap(scene, map)
 {
-	var map = thebeast_getImage("map");
+	if (scene === null) {console.log("scene is null");}
+	if (map === null) {console.log("map is null");}
+
 	var w = map.width;
 	var h = map.height;
 	
@@ -105,11 +107,16 @@ function thebeast_setSmoothing(context, val)
 	else {console.log("Smoothing property not supported for browser");}
 }
 
-function thebeast_newScene()
+function thebeast_newScene(map)
 {
+	if (typeof map !== "string") {console.log("map is not string");}
+
 	return {
+		"loadedMap": false,
+		"loadedImages": false,
 		"loaded": false,
 		"objects": {},
+		"map": map,
 	};
 }
 
@@ -205,6 +212,31 @@ function thebeast_graphics(canvas, context, scene)
 	}, thebeast_getSetting("renderInterval"));
 }
 
+function thebeast_updateSceneState(scene)
+{
+	if (scene === null) {console.log("scene is null");}
+
+	scene.loaded = scene.loadedImages && scene.loadedMap;
+}
+
+function thebeast_load(scene)
+{
+	if (typeof scene !== "object") {console.log(typeof scene);}
+
+	var imageSources = thebeast_image_sources;
+	thebeast_loadImages({"map": scene.map}, function(images) {
+		var map = images.map;
+		thebeast_loadMap(scene, map);
+		scene.loadedMap = true;
+		thebeast_updateSceneState(scene);
+	});
+	thebeast_loadImages(imageSources, function(images) {
+		thebeast_images = images;
+		scene.loadedImages = true;
+		thebeast_updateSceneState(scene);
+	});
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -214,7 +246,7 @@ var thebeast = function()
 	if (context === null) {console.log("context is null");}
 	
 	// Load objects.
-	var scene = thebeast_newScene();
+	var scene = thebeast_newScene("./images/map.png");
 	var player = thebeast_newObject("theBeast", 0, 0, 1, 0);
 	var objects = [
 		player,
@@ -232,17 +264,8 @@ var thebeast = function()
 	// Graphics.
 	thebeast_graphics(canvas, context, scene);
 	
-	var imageSources = thebeast_image_sources;
-	thebeast_loadImages(imageSources, function(images) {
-		thebeast_images = images;
-		
-		// Load objects from map.
-		thebeast_loadMap(scene);
-		
-		scene.loaded = true;
-	});
-	
-	
+	// Load assets.
+	thebeast_load(scene);
 }
 
 window.addEventListener("load", thebeast, true);
