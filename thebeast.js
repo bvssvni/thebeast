@@ -13,6 +13,21 @@ var thebeast_image_sources = {
 };
 var thebeast_scene = null;
 
+// These are actions that can be performed on objects.
+var thebeast_actions = {
+	"setPosition": function(obj, args) {
+		// dt, x, y.
+		if (args.dt > 0) {args.dt--; return false;}
+		if (typeof args.x !== "number") {console.log(typeof args.x);}
+		if (typeof args.y !== "number") {console.log(typeof args.y);}
+		
+		obj.x = args.x;
+		obj.y = args.y;
+		
+		return true;
+	}
+}
+
 function thebeast_getSetting(id)
 {
 	var setting = thebeast_settings[id];
@@ -146,15 +161,39 @@ function thebeast_newObject(type, x, y, vx, vy)
 		"y": y,
 		"vx": vx,
 		"vy": vy,
+		"actions": [],
 	};
 }
 
 function thebeast_moveObject(obj)
 {
 	if (typeof obj !== "object") {console.log(typeof obj);}
+	var actions = obj.actions;
+	if (typeof actions !== "object") {console.log(typeof obj);}
 	
-	obj.x += obj.vx;
-	obj.y += obj.vy;
+	if (actions.length > 0)
+	{
+		// TEST
+		console.log(actions.length);
+	
+		var action = actions[0];
+		var name = action.name;
+		if (typeof name !== "string") {console.log(typeof name);}
+		
+		var f = thebeast_actions[name];
+		if (f === null) {console.log("Could not find " + name + " among actions");}
+		if (f(obj, action))
+		{
+			// Remove action since it is complete.
+			actions.splice(0, 1);
+		}
+	}
+	else
+	{
+		// Move with velocity.
+		obj.x += obj.vx;
+		obj.y += obj.vy;
+	}
 }
 
 function thebeast_drawObject(context, obj)
@@ -220,6 +259,13 @@ function thebeast_physics(scene)
 			thebeast_moveObject(obj);
 		}
 		
+		n = scene.players.length;
+		for (var i = 0; i < n; i++)
+		{
+			var player = scene.players[i];
+			thebeast_moveObject(player);
+		}
+		
 		scene.time++;
 	}, thebeast_getSetting("moveInterval"));
 }
@@ -263,6 +309,16 @@ function thebeast_load(scene)
 	});
 }
 
+function thebeast_setPosition(obj, dt, x, y)
+{
+	if (typeof obj !== "object") {console.log(typeof obj);}
+	if (typeof dt !== "number") {console.log(typeof dt);}
+	if (typeof x !== "number") {console.log(typeof x);}
+	if (typeof y !== "number") {console.log(typeof y);}
+	
+	obj.actions.push({name: "setPosition", dt: dt, x: x, y: y});
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -275,6 +331,9 @@ var thebeast = function()
 	var scene = thebeast_newScene("./images/map.png",
 	function() {
 		// Onload.
+		var player = scene.players[0];
+		thebeast_setPosition(player, 100, 100, 100);
+		thebeast_setPosition(player, 100, 200, 100);
 	});
 	
 	// Set rendering settings.
