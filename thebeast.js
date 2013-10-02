@@ -1,4 +1,13 @@
-
+/**
+ * thebeast, An open source game in HTML and Javascript about a beast living in the forest.
+ *
+ * @version 0.000, http://isprogrammingeasy.blogspot.no/2012/08/angular-degrees-versioning-notation.html
+ * @license GNU Lesser General Public License, http://www.gnu.org/copyleft/lesser.html
+ * @author  Sven Nilsen, http://www.cutoutpro.com
+ * @link    http://www.github.com/bvssvni/thebeast
+ *
+ */
+ 
 var thebeast_settings = {
 	"boxId": "box",
 	"moveInterval": 10,
