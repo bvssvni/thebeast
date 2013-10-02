@@ -80,6 +80,30 @@ var thebeast_actions = {
 		obj.y += dy * speed / d;
 		return false;
 	},
+	sendMessage: function(obj, args) {
+		// target, title, message.
+		if (typeof args.target !== "object") {console.log(typeof args.target);}
+		if (typeof args.title !== "string") {console.log(typeof args.title);}
+		if (typeof args.message !== "object") {console.log(typeof args.message);}
+		
+		args.target.messages.push({title: args.title, body: args.message});
+		return true;
+	},
+	waitForMessage: function(obj, args) {
+		// title, callback.
+		if (typeof args.title !== "string") {console.log(typeof args.title);}
+		if (typeof args.callback !== "function") {console.log(typeof args.callback);}
+		
+		var n = obj.messages.length;
+		if (n === 0) {return false;}
+		
+		var message = obj.messages[0];
+		if (message.title !== args.title) {return false;}
+		
+		obj.messages.splice(0, 1);
+		args.callback(message.body);
+		return true;
+	},
 }
 
 function thebeast_getSetting(id)
@@ -218,6 +242,7 @@ function thebeast_newObject(type, x, y, vx, vy)
 		"vx": vx,
 		"vy": vy,
 		"actions": [],
+		"messages": [],
 	};
 }
 
@@ -285,8 +310,8 @@ function thebeast_render(canvas, context, scene)
 	if (scene.cameras.length > cameraIndex)
 	{
 		var camera = scene.cameras[cameraIndex];
-		var x = Math.floor(camera.x);
-		var y = Math.floor(camera.y);
+		var x = Math.floor(-camera.x + 0.5 * w);
+		var y = Math.floor(-camera.y + 0.5 * h);
 		context.translate(x, y);
 	}
 
@@ -429,6 +454,25 @@ function thebeast_wait(obj, dt)
 	obj.actions.push({name: "wait", dt: dt});
 }
 
+function thebeast_sendMessage(obj, target, title, message)
+{
+	if (typeof obj !== "object") {console.log(typeof obj);}
+	if (typeof target !== "object") {console.log(typeof target);}
+	if (typeof title !== "string") {console.log(typeof title);}
+	if (typeof message !== "object") {console.log(typeof message);}
+	
+	obj.actions.push({name: "sendMessage", target: target, title: title, message: message});
+}
+
+function thebeast_waitForMessage(obj, title, callback)
+{
+	if (typeof obj !== "object") {console.log(typeof obj);}
+	if (typeof title !== "string") {console.log(typeof title);}
+	if (typeof callback !== "function") {console.log(typeof callback);}
+	
+	obj.actions.push({name: "waitForMessage", title: title, callback: callback});
+}
+
 function thebeast_addCamera(scene, x, y)
 {
 	if (typeof scene !== "object") {console.log(typeof scene);}
@@ -456,12 +500,13 @@ var thebeast = function()
 		var camera = scene.cameras[0];
 		var player = scene.players[0];
 		
-		thebeast_wait(camera, 200);
-		// thebeast_movePosition(camera, 100, 100, 100);
-		thebeast_followWithSpeed(camera, 0.1, player);
-		
 		thebeast_moveWithSpeed(player, 1, 100, 100);
 		thebeast_moveWithSpeed(player, 1, 200, 100);
+		thebeast_sendMessage(player, camera, "follow me", {target: player});
+		
+		thebeast_waitForMessage(camera, "follow me", function(msg) {
+			thebeast_followWithSpeed(camera, 1, msg.target);
+		});
 	});
 	
 	// Set rendering settings.
