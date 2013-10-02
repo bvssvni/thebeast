@@ -36,6 +36,12 @@ function thebeast_loadImages(sources, callback)
 	}
 }
 
+function thebeast_setSmoothing(context, val)
+{
+	if ("mozImageSmoothingEnabled" in context) {context.mozImageSmoothingEnabled = val;}
+	else {console.log("Smoothing property not supported for browser");}
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -48,8 +54,9 @@ var thebeast = function()
 		"thebeast-front": "./images/thebeast-front.png"
 	};
 	
+	thebeast_setSmoothing(context, false);
 	thebeast_loadImages(imageSources, function(images) {
-		context.drawImage(images["thebeast-front"], 0, 0, 16, 16);
+		context.drawImage(images["thebeast-front"], 0, 0, 64, 64);
 	});
 }
 
