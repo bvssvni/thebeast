@@ -37,8 +37,8 @@ function thebeast_getImage(id)
 
 function thebeast_loadImages(sources, callback)
 {
-	if (sources === null) {console.log("sources is null");}
-	if (callback === null) {console.log("callback is null");}
+	if (typeof sources !== "object") {console.log(typeof sources);}
+	if (typeof callback !== "function") {console.log(typeof callback);}
 
 	var images = {};
 	var loadedImages = 0;
@@ -67,23 +67,23 @@ function thebeast_compareColors(a, b)
 
 function thebeast_loadMap(scene, map)
 {
-	if (scene === null) {console.log("scene is null");}
-	if (map === null) {console.log("map is null");}
+	if (typeof scene !== "object") {console.log(typeof scene);}
+	if (typeof map !== "object") {console.log(typeof map);}
 
 	var w = map.width;
 	var h = map.height;
 	
 	var canvas = document.createElement("canvas");
-	if (canvas === null) {console.log("canvas is null");}
+	if (typeof canvas !== "object") {console.log(typeof canvas);}
 	canvas.width = w;
 	canvas.height = h;
 	var context = canvas.getContext('2d');
-	if (context === null) {console.log("context is null");}
+	if (typeof context !== "object") {console.log(typeof context);}
 	thebeast_setSmoothing(context, false);
 	context.drawImage(map, 0, 0);
 	
 	var data = context.getImageData(0, 0, w, h).data;
-	if (data === null) {console.log("data is null");}
+	if (typeof data !== "object") {console.log(typeof data);}
 	
 	var box1Color = thebeast_getSetting("box1Color");
 	var units = 64;
@@ -122,11 +122,11 @@ function thebeast_newScene(map)
 
 function thebeast_newObject(type, x, y, vx, vy)
 {
-	if (type === null) {console.log("type is null");}
-	if (x === null) {console.log("x is null");}
-	if (y === null) {console.log("y is null");}
-	if (vx === null) {console.log("vx is null");}
-	if (vy === null) {console.log("vy is null");}
+	if (typeof type !== "string") {console.log(typeof type);}
+	if (typeof x !== "number") {console.log(typeof x);}
+	if (typeof y !== "number") {console.log(typeof y);}
+	if (typeof vx !== "number") {console.log(typeof vx);}
+	if (typeof vy !== "number") {console.log(typeof vy);}
 	
 	return {
 		"type": type,
@@ -139,7 +139,7 @@ function thebeast_newObject(type, x, y, vx, vy)
 
 function thebeast_moveObject(obj)
 {
-	if (obj === null) {console.log("obj is null");}
+	if (typeof obj !== "object") {console.log(typeof obj);}
 	
 	obj.x += obj.vx;
 	obj.y += obj.vy;
@@ -147,8 +147,9 @@ function thebeast_moveObject(obj)
 
 function thebeast_drawObject(context, obj)
 {
-	if (context === null) {console.log("context is null");}
-	if (obj === null) {console.log("obj is null");}
+	if (typeof context !== "object") {console.log(typeof context);}
+	if (typeof obj !== "object") {console.log(typeof obj);}
+	
 	if (obj.type === "theBeast")
 	{
 		var image = thebeast_getImage("thebeast-front");
@@ -163,9 +164,9 @@ function thebeast_drawObject(context, obj)
 
 function thebeast_render(canvas, context, objs)
 {
-	if (canvas === null) {console.log("canvas is null");}
-	if (context === null) {console.log("context is null");}
-	if (objs === null) {console.log("objs is null");}
+	if (typeof canvas !== "object") {console.log(typeof canvas);}
+	if (typeof context !== "object") {console.log(typeof context);}
+	if (typeof objs !== "object") {console.log(typeof objs);}
 
 	// Clear buffer.
 	var w = canvas.width;
@@ -181,12 +182,12 @@ function thebeast_render(canvas, context, objs)
 
 function thebeast_physics(scene)
 {
-	if (scene === null) {console.log("scene is null");}
+	if (typeof scene !== "object") {console.log(typeof scene);}
 	setInterval(function() {
 		var loaded = scene.loaded;
 		var objects = scene.objects;
-		if (loaded === null) {console.log("loaded is null");}
-		if (objects === null) {console.log("objects is null");}
+		if (typeof loaded !== "boolean") {console.log(typeof loaded);}
+		if (typeof objects !== "object") {console.log(typeof objects);}
 		if (!loaded) {return;}
 	
 		var n = objects.length;
@@ -200,9 +201,9 @@ function thebeast_physics(scene)
 
 function thebeast_graphics(canvas, context, scene)
 {
-	if (canvas === null) {console.log("canvas is null");}
-	if (context === null) {console.log("context is null");}
-	if (scene === null) {console.log("scene is null");}
+	if (typeof canvas !== "object") {console.log(typeof canvas);}
+	if (typeof context !== "object") {console.log(typeof context);}
+	if (typeof scene !== "object") {console.log(typeof scene);}
 	
 	setInterval(function() {
 		var loaded = scene.loaded;
@@ -214,7 +215,7 @@ function thebeast_graphics(canvas, context, scene)
 
 function thebeast_updateSceneState(scene)
 {
-	if (scene === null) {console.log("scene is null");}
+	if (typeof scene !== "object") {console.log(typeof scene);}
 
 	scene.loaded = scene.loadedImages && scene.loadedMap;
 }
@@ -241,9 +242,9 @@ var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
 	var canvas = document.getElementById(boxId);
-	if (canvas === null) {console.log("canvas is null");}
+	if (typeof canvas !== "object") {console.log(typeof canvas);}
 	var context = canvas.getContext('2d');
-	if (context === null) {console.log("context is null");}
+	if (typeof context !== "object") {console.log(typeof context);}
 	
 	// Load objects.
 	var scene = thebeast_newScene("./images/map.png");
