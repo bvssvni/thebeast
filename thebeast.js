@@ -6,7 +6,8 @@ var thebeast_settings = {
 };
 var thebeast_images = null;
 var thebeast_image_sources = {
-	"thebeast-front": "./images/thebeast-front.png"
+	"thebeast-front": "./images/thebeast-front.png",
+	"box1": "./images/box1.png",
 };
 var thebeast_scene = null;
 
@@ -100,7 +101,12 @@ function thebeast_drawObject(context, obj)
 	if (obj.type === "theBeast")
 	{
 		var image = thebeast_getImage("thebeast-front");
-		context.drawImage(image, obj.x, obj.y, 32, 32);
+		context.drawImage(image, obj.x, obj.y, 64, 64);
+	}
+	if (obj.type === "box1")
+	{
+		var image = thebeast_getImage("box1");
+		context.drawImage(image, obj.x, obj.y, 64, 64);
 	}
 }
 
@@ -166,7 +172,10 @@ var thebeast = function()
 	// Load objects.
 	var scene = thebeast_newScene();
 	var player = thebeast_newObject("theBeast", 0, 0, 1, 0);
-	var objects = [player];
+	var objects = [
+		player,
+		thebeast_newObject("box1", 0, 0, 0, 0),
+	];
 	scene.objects = objects;
 	
 	// Set rendering settings.
