@@ -56,7 +56,7 @@ var thebeast = function()
 	
 	thebeast_setSmoothing(context, false);
 	thebeast_loadImages(imageSources, function(images) {
-		context.drawImage(images["thebeast-front"], 0, 0, 64, 64);
+		context.drawImage(images["thebeast-front"], 0, 0, 32, 32);
 	});
 }
 
