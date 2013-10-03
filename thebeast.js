@@ -507,6 +507,46 @@ function thebeast_solveCollision(objA, objB, coA, coB)
 	}
 }
 
+function thebeast_collision(scene)
+{
+	if (typeof scene !== "object") {console.log(typeof scene);}
+
+	var players = scene.players;
+	var objects = scene.objects;
+	var n = players.length;
+	var m = objects.length;
+	var playerOffset = thebeast_getSetting("playerCollisionOffset");
+	var treeOffset = thebeast_getSetting("treeCollisionOffset");
+	var box1Offset = thebeast_getSetting("box1CollisionOffset");
+	var objOffset = null;
+	for (var i = 0; i < n; i++)
+	{
+		var player = players[i];
+		for (var j = 0; j < m; j++)
+		{
+			var obj = objects[j];
+			if (obj.type === "tree1")
+			{
+				objOffset = treeOffset;
+			}
+			else if (obj.type === "box1")
+			{
+				objOffset = box1Offset;
+			}
+			else
+			{
+				continue;
+			}
+			
+			var collides = thebeast_doesCollide(player, obj, playerOffset, objOffset);
+			if (collides)
+			{
+				thebeast_solveCollision(player, obj, playerOffset, objOffset);
+			}
+		}
+	}
+}
+
 function thebeast_physics(scene)
 {
 	if (typeof scene !== "object") {console.log(typeof scene);}
@@ -566,38 +606,7 @@ function thebeast_physics(scene)
 			thebeast_moveObject(player);
 		}
 		
-		n = players.length;
-		var m = objects.length;
-		var playerOffset = thebeast_getSetting("playerCollisionOffset");
-		var treeOffset = thebeast_getSetting("treeCollisionOffset");
-		var box1Offset = thebeast_getSetting("box1CollisionOffset");
-		var objOffset = null;
-		for (var i = 0; i < n; i++)
-		{
-			var player = players[i];
-			for (var j = 0; j < m; j++)
-			{
-				var obj = objects[j];
-				if (obj.type === "tree1")
-				{
-					objOffset = treeOffset;
-				}
-				else if (obj.type === "box1")
-				{
-					objOffset = box1Offset;
-				}
-				else
-				{
-					continue;
-				}
-				
-				var collides = thebeast_doesCollide(player, obj, playerOffset, objOffset);
-				if (collides)
-				{
-					thebeast_solveCollision(player, obj, playerOffset, objOffset);
-				}
-			}
-		}
+		thebeast_collision(scene);
 		
 		// Move cameras.
 		n = scene.cameras.length;
