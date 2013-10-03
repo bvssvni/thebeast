@@ -798,9 +798,9 @@ function thebeast_addCamera(scene, x, y, onidle)
 	if (typeof x !== "number") {console.log(typeof x);}
 	if (typeof y !== "number") {console.log(typeof y);}
 	
-	scene.cameras.push(thebeast_newObject("camera", x, y, 0, 0));
-	var camera = scene.cameras[scene.cameras.length - 1];
-	camera.onidle = onidle;
+	var camera = thebeast_newObject("camera", x, y, 0, 0);
+	camera.idle = onidle;
+	scene.cameras.push(camera);
 	return scene.cameras.length - 1;
 }
 
