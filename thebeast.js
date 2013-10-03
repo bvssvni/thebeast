@@ -777,6 +777,22 @@ function thebeast_movePlayerToMousePosition(canvas, scene, event)
 	thebeast_moveWithSpeed(player, 1, x, y);
 }
 
+function thebeast_createSlideCamera(scene)
+{
+	var player = scene.players[0];
+	thebeast_addCamera(scene, 0, 0, function() {
+		var camera = scene.cameras[0];
+		var cameraView = thebeast_cameraView(scene, camera);
+		var playerOutside = thebeast_outsideCameraView(cameraView, player);
+		if (!playerOutside) {return;}
+		
+		thebeast_moveCameraToObject(scene, camera, player);
+	});
+	var camera = scene.cameras[0];
+	
+	thebeast_setCameraToObject(scene, camera, player);
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -786,28 +802,7 @@ var thebeast = function()
 	if (typeof context !== "object") {console.log(typeof context);}
 	
 	var onload = function() {
-		var player = scene.players[0];
-		
-		// Onload.
-		// Add camera.
-		thebeast_addCamera(scene, 0, 0, function() {
-			var camera = scene.cameras[0];
-			var cameraView = thebeast_cameraView(scene, camera);
-			var playerOutside = thebeast_outsideCameraView(cameraView, player);
-			if (!playerOutside) {return;}
-			
-			thebeast_moveCameraToObject(scene, camera, player);
-		});
-		var camera = scene.cameras[0];
-		
-		thebeast_setCameraToObject(scene, camera, player);
-		
-		/*
-		thebeast_moveWithSpeed(player, 1, 200, 80);
-		thebeast_moveWithSpeed(player, 1, 0, 80);
-		thebeast_moveWithSpeed(player, 1, 200, 50);
-		thebeast_moveWithSpeed(player, 1, 0, 80);
-		*/
+		thebeast_createSlideCamera(scene);
 	};
 	
 	var onmousedown = function(event) {
