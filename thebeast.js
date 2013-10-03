@@ -751,6 +751,17 @@ function thebeast_moveCameraToObject(scene, camera, obj)
 	thebeast_moveWithSpeed(camera, cameraSpeed, x, y);
 }
 
+function thebeast_mousePosition(canvas, event)
+{
+	if (typeof canvas !== "object") {console.log(typeof canvas);}
+	if (typeof event !== "object") {console.log(typeof event);}
+	
+	event = event || window.event;
+	var x = event.clientX - canvas.offsetLeft;
+	var y = event.clientY - canvas.offsetTop;
+	return {x: x, y: y};
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -781,6 +792,14 @@ var thebeast = function()
 		thebeast_moveWithSpeed(player, 1, 200, 50);
 		thebeast_moveWithSpeed(player, 1, 0, 80);
 	};
+	
+	var onmousedown = function(event) {
+		// TEST
+		console.log("mouse click");
+		var pos = thebeast_mousePosition(canvas, event);
+		console.log(pos.x + " " + pos.y);
+	};
+	canvas.addEventListener("mousedown", onmousedown, true);
 	
 	// Load objects.
 	var scene = thebeast_newScene(canvas.width, canvas.height, "./images/map.png", onload);
