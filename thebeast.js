@@ -18,6 +18,7 @@ var thebeast_settings = {
 	"units": 64,
 	"cameraSpeed": 10,
 	"playerMaxSpeed": 1,
+	"playerAcceleration": 0.5,
 	"playerCollisionOffset": [0.25, 0.8, 0.25, 0],
 	"treeCollisionOffset": [0.25, 0.8, 0.25, 0],
 	"box1CollisionOffset": [0, 0, 0, 0],
@@ -264,6 +265,16 @@ function thebeast_loadMap(scene, map)
 				var player = thebeast_newObject("theBeast", x * units, y * units, 0, 0);
 				player.maxSpeedLeftRight = playerMaxSpeed;
 				player.maxSpeedUpDown = playerMaxSpeed;
+				
+				// Move player with keyboard.
+				player.idle = function() {
+					var vx = player.maxSpeedLeftRight * player.leftRight;
+					var vy = player.maxSpeedUpDown * player.upDown;
+					var acc = thebeast_getSetting("playerAcceleration");
+					player.vx += acc * (vx - player.vx);
+					player.vy += acc * (vy - player.vy);
+				};
+				
 				scene.players.push(player);
 			}
 			else if (thebeast_compareColors(tree1Color, color))
@@ -901,14 +912,6 @@ var thebeast = function()
 	
 	var onload = function() {
 		thebeast_createSlideCamera(scene);
-		
-		var player = scene.players[0];
-		player.idle = function() {
-			var vx = player.maxSpeedLeftRight * player.leftRight;
-			var vy = player.maxSpeedUpDown * player.upDown;
-			player.vx += 0.5 * (vx - player.vx);
-			player.vy += 0.5 * (vy - player.vy);
-		};
 	};
 	
 	var onmousedown = function(event) {
