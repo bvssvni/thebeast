@@ -381,7 +381,7 @@ function thebeast_cameraView(scene, camera)
 	
 	var x = Math.floor(camera.x - scene.width * 0.5);
 	var y = Math.floor(camera.y - scene.height * 0.5);
-	return [x, y, x + scene.width, y + scene.width];
+	return [x, y, x + scene.width, y + scene.height];
 }
 
 function thebeast_outsideCameraView(cameraView, obj)
