@@ -638,9 +638,9 @@ var thebeast = function()
 		
 		thebeast_setCameraToObject(scene, camera, player);
 		
-		thebeast_moveWithSpeed(player, 1, 800, 80);
+		thebeast_moveWithSpeed(player, 1, 200, 80);
 		thebeast_moveWithSpeed(player, 1, 0, 80);
-		thebeast_moveWithSpeed(player, 1, 800, 60);
+		thebeast_moveWithSpeed(player, 1, 200, 60);
 		thebeast_moveWithSpeed(player, 1, 0, 80);
 	};
 	
