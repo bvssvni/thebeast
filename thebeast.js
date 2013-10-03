@@ -17,6 +17,7 @@ var thebeast_settings = {
 	"tree1Color": [0, 255, 0, 255],
 	"units": 64,
 	"cameraSpeed": 10,
+	"playerMaxSpeed": 1,
 	"playerCollisionOffset": [0.25, 0.8, 0.25, 0],
 	"treeCollisionOffset": [0.25, 0.8, 0.25, 0],
 	"box1CollisionOffset": [0, 0, 0, 0],
@@ -247,6 +248,7 @@ function thebeast_loadMap(scene, map)
 	var playerColor = thebeast_getSetting("playerColor");
 	var tree1Color = thebeast_getSetting("tree1Color");
 	var units = thebeast_getSetting("units");
+	var playerMaxSpeed = thebeast_getSetting("playerMaxSpeed");
 	for (var x = 0; x < w; x++)
 	{
 		for (var y = 0; y < h; y++)
@@ -255,16 +257,18 @@ function thebeast_loadMap(scene, map)
 			var color = [data[i*4+0], data[i*4+1], data[i*4+2], data[i*4+3]];
 			if (thebeast_compareColors(box1Color, color))
 			{
-				scene.objects.push(thebeast_newObject("box1", x * units, y * units, 0, 0, null));
+				scene.objects.push(thebeast_newObject("box1", x * units, y * units, 0, 0));
 			}
 			else if (thebeast_compareColors(playerColor, color))
 			{
-				var player = thebeast_newObject("theBeast", x * units, y * units, 0, 0, null);
+				var player = thebeast_newObject("theBeast", x * units, y * units, 0, 0);
+				player.maxSpeedLeftRight = playerMaxSpeed;
+				player.maxSpeedUpDown = playerMaxSpeed;
 				scene.players.push(player);
 			}
 			else if (thebeast_compareColors(tree1Color, color))
 			{
-				scene.objects.push(thebeast_newObject("tree1", x * units, y * units, 0, 0, null));
+				scene.objects.push(thebeast_newObject("tree1", x * units, y * units, 0, 0));
 			}
 		}
 	}
@@ -302,14 +306,13 @@ function thebeast_newScene(width, height, map, onload)
 	};
 }
 
-function thebeast_newObject(type, x, y, vx, vy, onidle)
+function thebeast_newObject(type, x, y, vx, vy)
 {
 	if (typeof type !== "string") {console.log(typeof type);}
 	if (typeof x !== "number") {console.log(typeof x);}
 	if (typeof y !== "number") {console.log(typeof y);}
 	if (typeof vx !== "number") {console.log(typeof vx);}
 	if (typeof vy !== "number") {console.log(typeof vy);}
-	if (onidle !== null && typeof onidle !== "function") {console.log(typeof onidle);}
 	
 	return {
 		"type": type,
@@ -321,9 +324,11 @@ function thebeast_newObject(type, x, y, vx, vy, onidle)
 		"vy": vy,
 		"actions": [],
 		"messages": [],
-		"idle": onidle,
+		"idle": null,
 		"leftRight": 0,
 		"upDown": 0,
+		"maxSpeedLeftRight": 0,
+		"maxSpeedUpDown": 0,
 	};
 }
 
@@ -782,7 +787,9 @@ function thebeast_addCamera(scene, x, y, onidle)
 	if (typeof x !== "number") {console.log(typeof x);}
 	if (typeof y !== "number") {console.log(typeof y);}
 	
-	scene.cameras.push(thebeast_newObject("camera", x, y, 0, 0, onidle));
+	scene.cameras.push(thebeast_newObject("camera", x, y, 0, 0));
+	var camera = scene.cameras[scene.cameras.length - 1];
+	camera.onidle = onidle;
 	return scene.cameras.length - 1;
 }
 
@@ -846,6 +853,7 @@ function thebeast_createSlideCamera(scene)
 function thebeast_updatePlayerInput(scene)
 {
 	if (typeof scene !== "object") {console.log(typeof scene);}
+	if (!scene.loaded) {return;}
 
 	var player = scene.players[0];
 	var leftPressed = thebeast_isKeyPressed("left");
@@ -893,6 +901,14 @@ var thebeast = function()
 	
 	var onload = function() {
 		thebeast_createSlideCamera(scene);
+		
+		var player = scene.players[0];
+		player.idle = function() {
+			var vx = player.maxSpeedLeftRight * player.leftRight;
+			var vy = player.maxSpeedUpDown * player.upDown;
+			player.vx += 0.5 * (vx - player.vx);
+			player.vy += 0.5 * (vy - player.vy);
+		};
 	};
 	
 	var onmousedown = function(event) {
