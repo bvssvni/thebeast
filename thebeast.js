@@ -843,6 +843,26 @@ function thebeast_createSlideCamera(scene)
 	thebeast_setCameraToObject(scene, camera, player);
 }
 
+function thebeast_updatePlayerInput(scene)
+{
+	if (typeof scene !== "object") {console.log(typeof scene);}
+
+	var player = scene.players[0];
+	var leftPressed = thebeast_isKeyPressed("left");
+	var rightPressed = thebeast_isKeyPressed("right");
+	var upPressed = thebeast_isKeyPressed("up");
+	var downPressed = thebeast_isKeyPressed("down");
+	var leftRight = 0;
+	var upDown = 0;
+	if (leftPressed) {leftRight--;}
+	if (rightPressed) {leftRight++;}
+	if (upPressed) {upDown--;}
+	if (downPressed) {upDown++;}
+	
+	player.leftRight = leftRight;
+	player.upDown = upDown;
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -864,6 +884,7 @@ var thebeast = function()
 		var event = event || window.event;
 		var keyCode = event.keyCode;
 		thebeast_setKey(keyCode, true);
+		thebeast_updatePlayerInput(scene);
 	};
 	window.addEventListener("keydown", onkeydown, false);
 	
@@ -871,6 +892,7 @@ var thebeast = function()
 		var event = event || window.event;
 		var keyCode = event.keyCode;
 		thebeast_setKey(keyCode, false);
+		thebeast_updatePlayerInput(scene);
 	};
 	window.addEventListener("keyup", onkeyup, false);
 	
