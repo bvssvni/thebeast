@@ -20,7 +20,7 @@ var thebeast_settings = {
 	"playerMaxSpeed": 1,
 	"playerAcceleration": 0.5,
 	"playerCollisionOffset": [0.25, 0.8, 0.25, 0],
-	"treeCollisionOffset": [0.25, 0.8, 0.25, 0],
+	"treeCollisionOffset": [0.4, 0.8, 0.4, 0],
 	"box1CollisionOffset": [0, 0, 0, 0],
 };
 var thebeast_images = null;
