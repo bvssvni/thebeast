@@ -751,14 +751,18 @@ function thebeast_moveCameraToObject(scene, camera, obj)
 	thebeast_moveWithSpeed(camera, cameraSpeed, x, y);
 }
 
-function thebeast_mousePosition(canvas, event)
+function thebeast_mousePosition(canvas, scene, event)
 {
 	if (typeof canvas !== "object") {console.log(typeof canvas);}
+	if (typeof scene !== "object") {console.log(typeof scene);}
 	if (typeof event !== "object") {console.log(typeof event);}
 	
 	event = event || window.event;
 	var x = event.clientX - canvas.offsetLeft;
 	var y = event.clientY - canvas.offsetTop;
+	var camera = scene.cameras[scene.camera];
+	x -= camera.x - 0.5 * scene.width;
+	y -= camera.y - 0.5 * scene.height;
 	return {x: x, y: y};
 }
 
@@ -796,7 +800,7 @@ var thebeast = function()
 	var onmousedown = function(event) {
 		// TEST
 		console.log("mouse click");
-		var pos = thebeast_mousePosition(canvas, event);
+		var pos = thebeast_mousePosition(canvas, scene, event);
 		console.log(pos.x + " " + pos.y);
 	};
 	canvas.addEventListener("mousedown", onmousedown, true);
