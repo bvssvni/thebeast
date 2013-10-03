@@ -863,6 +863,26 @@ function thebeast_updatePlayerInput(scene)
 	player.upDown = upDown;
 }
 
+function thebeast_keyboard(scene)
+{
+	if (typeof scene !== "object") {console.log(typeof scene);}
+	var onkeydown = function(event) {
+		var event = event || window.event;
+		var keyCode = event.keyCode;
+		thebeast_setKey(keyCode, true);
+		thebeast_updatePlayerInput(scene);
+	};
+	window.addEventListener("keydown", onkeydown, false);
+	
+	var onkeyup = function(event) {
+		var event = event || window.event;
+		var keyCode = event.keyCode;
+		thebeast_setKey(keyCode, false);
+		thebeast_updatePlayerInput(scene);
+	};
+	window.addEventListener("keyup", onkeyup, false);
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -880,24 +900,11 @@ var thebeast = function()
 	};
 	canvas.addEventListener("mousedown", onmousedown, true);
 	
-	var onkeydown = function(event) {
-		var event = event || window.event;
-		var keyCode = event.keyCode;
-		thebeast_setKey(keyCode, true);
-		thebeast_updatePlayerInput(scene);
-	};
-	window.addEventListener("keydown", onkeydown, false);
-	
-	var onkeyup = function(event) {
-		var event = event || window.event;
-		var keyCode = event.keyCode;
-		thebeast_setKey(keyCode, false);
-		thebeast_updatePlayerInput(scene);
-	};
-	window.addEventListener("keyup", onkeyup, false);
-	
 	// Load objects.
 	var scene = thebeast_newScene(canvas.width, canvas.height, "./images/map.png", onload);
+	
+	// Handle keyboard input.
+	thebeast_keyboard(scene);
 	
 	// Set rendering settings.
 	thebeast_setSmoothing(context, false);
