@@ -16,6 +16,7 @@ var thebeast_settings = {
 	"box1Color": [255, 0, 0, 255],
 	"tree1Color": [0, 255, 0, 255],
 	"units": 64,
+	"cameraSpeed": 10,
 };
 var thebeast_images = null;
 var thebeast_image_sources = {
@@ -203,16 +204,16 @@ function thebeast_loadMap(scene, map)
 			var color = [data[i*4+0], data[i*4+1], data[i*4+2], data[i*4+3]];
 			if (thebeast_compareColors(box1Color, color))
 			{
-				scene.objects.push(thebeast_newObject("box1", x * units, y * units, 0, 0));
+				scene.objects.push(thebeast_newObject("box1", x * units, y * units, 0, 0, null));
 			}
 			else if (thebeast_compareColors(playerColor, color))
 			{
-				var player = thebeast_newObject("theBeast", x * units, y * units, 0, 0);
+				var player = thebeast_newObject("theBeast", x * units, y * units, 0, 0, null);
 				scene.players.push(player);
 			}
 			else if (thebeast_compareColors(tree1Color, color))
 			{
-				scene.objects.push(thebeast_newObject("tree1", x * units, y * units, 0, 0));
+				scene.objects.push(thebeast_newObject("tree1", x * units, y * units, 0, 0, null));
 			}
 		}
 	}
@@ -226,8 +227,10 @@ function thebeast_setSmoothing(context, val)
 	else {console.log("Smoothing property not supported for browser");}
 }
 
-function thebeast_newScene(map, onload)
+function thebeast_newScene(width, height, map, onload)
 {
+	if (typeof width !== "number") {console.log(typeof width);}
+	if (typeof height !== "number") {console.log(typeof height);}
 	if (typeof map !== "string") {console.log(typeof map);}
 	if (typeof onload !== "function") {console.log(typeof onload);}
 
@@ -242,16 +245,19 @@ function thebeast_newScene(map, onload)
 		"map": map,
 		"onload": onload,
 		"time": 0,
+		"width": width,
+		"height": height,
 	};
 }
 
-function thebeast_newObject(type, x, y, vx, vy)
+function thebeast_newObject(type, x, y, vx, vy, onidle)
 {
 	if (typeof type !== "string") {console.log(typeof type);}
 	if (typeof x !== "number") {console.log(typeof x);}
 	if (typeof y !== "number") {console.log(typeof y);}
 	if (typeof vx !== "number") {console.log(typeof vx);}
 	if (typeof vy !== "number") {console.log(typeof vy);}
+	if (onidle !== null && typeof onidle !== "function") {console.log(typeof onidle);}
 	
 	return {
 		"type": type,
@@ -261,6 +267,7 @@ function thebeast_newObject(type, x, y, vx, vy)
 		"vy": vy,
 		"actions": [],
 		"messages": [],
+		"idle": onidle,
 	};
 }
 
@@ -286,10 +293,32 @@ function thebeast_moveObject(obj)
 	}
 	else
 	{
+		if (obj.idle !== null) {obj.idle();}
+	
 		// Move with velocity.
 		obj.x += obj.vx;
 		obj.y += obj.vy;
 	}
+}
+
+// Returns the camera view as AABB rectangle.
+function thebeast_cameraView(scene, camera)
+{
+	if (typeof scene !== "object") {console.log(typeof scene);}
+	if (typeof camera !== "object") {console.log(typeof camera);}
+	
+	var x = Math.floor(camera.x - scene.width * 0.5);
+	var y = Math.floor(camera.y - scene.height * 0.5);
+	return [x, y, x + scene.width, y + scene.width];
+}
+
+function thebeast_outsideCameraView(cameraView, obj)
+{
+	var units = thebeast_getSetting("units");
+	return obj.x + units <= cameraView[0] ||
+		obj.y + units <= cameraView[1] ||
+		obj.x >= cameraView[2] ||
+		obj.y >= cameraView[3];
 }
 
 function thebeast_cover(objA, objB)
@@ -559,14 +588,29 @@ function thebeast_waitForMessage(obj, title, callback)
 	obj.actions.push({name: "waitForMessage", title: title, callback: callback});
 }
 
-function thebeast_addCamera(scene, x, y)
+function thebeast_addCamera(scene, x, y, onidle)
 {
 	if (typeof scene !== "object") {console.log(typeof scene);}
 	if (typeof x !== "number") {console.log(typeof x);}
 	if (typeof y !== "number") {console.log(typeof y);}
 	
-	scene.cameras.push(thebeast_newObject("camera", x, y, 0, 0));
+	scene.cameras.push(thebeast_newObject("camera", x, y, 0, 0, onidle));
 	return scene.cameras.length - 1;
+}
+
+function thebeast_setCameraToObject(scene, camera, obj)
+{
+	var x = obj.x - (obj.x % scene.width) + 0.5 * scene.width;
+	var y = obj.y - (obj.y % scene.height) + 0.5 * scene.height;
+	thebeast_setPosition(camera, 0, x, y);
+}
+
+function thebeast_moveCameraToObject(scene, camera, obj)
+{
+	var x = obj.x - (obj.x % scene.width) + 0.5 * scene.width;
+	var y = obj.y - (obj.y % scene.height) + 0.5 * scene.height;
+	var cameraSpeed = thebeast_getSetting("cameraSpeed");
+	thebeast_moveWithSpeed(camera, cameraSpeed, x, y);
 }
 
 var thebeast = function()
@@ -577,20 +621,31 @@ var thebeast = function()
 	var context = canvas.getContext('2d');
 	if (typeof context !== "object") {console.log(typeof context);}
 	
-	// Load objects.
-	var scene = thebeast_newScene("./images/map.png",
-	function() {
-		// Onload.
-		// Add camera.
-		thebeast_addCamera(scene, 0, 0);
-		var camera = scene.cameras[0];
+	var onload = function() {
 		var player = scene.players[0];
 		
-		thebeast_moveWithSpeed(player, 1, 200, 80);
+		// Onload.
+		// Add camera.
+		thebeast_addCamera(scene, 0, 0, function() {
+			var camera = scene.cameras[0];
+			var cameraView = thebeast_cameraView(scene, camera);
+			var playerOutside = thebeast_outsideCameraView(cameraView, player);
+			if (!playerOutside) {return;}
+			
+			thebeast_moveCameraToObject(scene, camera, player);
+		});
+		var camera = scene.cameras[0];
+		
+		thebeast_setCameraToObject(scene, camera, player);
+		
+		thebeast_moveWithSpeed(player, 1, 800, 80);
 		thebeast_moveWithSpeed(player, 1, 0, 80);
-		thebeast_moveWithSpeed(player, 1, 200, 60);
+		thebeast_moveWithSpeed(player, 1, 800, 60);
 		thebeast_moveWithSpeed(player, 1, 0, 80);
-	});
+	};
+	
+	// Load objects.
+	var scene = thebeast_newScene(canvas.width, canvas.height, "./images/map.png", onload);
 	
 	// Set rendering settings.
 	thebeast_setSmoothing(context, false);
