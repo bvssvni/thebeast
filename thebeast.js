@@ -292,9 +292,43 @@ function thebeast_moveObject(obj)
 	}
 }
 
-function thebeast_drawObject(context, obj)
+function thebeast_cover(objA, objB)
+{
+	if (typeof objA !== "object") {console.log(typeof objA);}
+	if (typeof objB !== "object") {console.log(typeof objB);}
+	
+	var units = thebeast_getSetting("units");
+	var intersectsX = objA.x + units >= objB.x && objA.x <= objB.x + units;
+	var intersectsY = objA.y + units >= objB.y && objA.y <= objB.y + units;
+	if (!intersectsX || !intersectsY) {return 0;}
+	
+	var coverX = units - Math.abs(objA.x - objB.x);
+	var coverY = units - Math.abs(objA.y - objB.y);
+	coverX /= units;
+	coverY /= units;
+	return coverX * coverY;
+}
+
+function thebeast_playerCover(players, obj)
+{
+	var maxCover = 0;
+	var n = players.length;
+	for (var i = 0; i < n; i++)
+	{
+		var player = players[i];
+		if (player.y > obj.y) {continue;}
+		
+		var cover = thebeast_cover(player, obj);
+		maxCover = Math.max(maxCover, cover);
+	}
+	
+	return maxCover;
+}
+
+function thebeast_drawObject(context, scene, obj)
 {
 	if (typeof context !== "object") {console.log(typeof context);}
+	if (typeof scene !== "object") {console.log(typeof scene);}
 	if (typeof obj !== "object") {console.log(typeof obj);}
 	
 	var units = thebeast_getSetting("units");
@@ -310,8 +344,20 @@ function thebeast_drawObject(context, obj)
 	}
 	else if (obj.type === "tree1")
 	{
+		// Detect cover with player.
+		var cover = thebeast_playerCover(scene.players, obj);
 		var image = thebeast_getImage("tree1");
-		context.drawImage(image, obj.x, obj.y, units, units);
+		if (cover > 0)
+		{
+			context.save();
+			context.globalAlpha = 1 - 0.5 * cover;
+			context.drawImage(image, obj.x, obj.y, units, units);
+			context.restore();
+		}
+		else
+		{
+			context.drawImage(image, obj.x, obj.y, units, units);
+		}
 	}
 }
 
@@ -366,7 +412,7 @@ function thebeast_render(canvas, context, scene)
 	var n = paintList.length;
 	for (var i = 0; i < n; i++)
 	{
-		thebeast_drawObject(context, paintList[i]);
+		thebeast_drawObject(context, scene, paintList[i]);
 	}
 	
 	context.restore();
