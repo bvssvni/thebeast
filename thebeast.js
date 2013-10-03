@@ -263,6 +263,8 @@ function thebeast_newObject(type, x, y, vx, vy, onidle)
 		"type": type,
 		"x": x,
 		"y": y,
+		"oldX": x,
+		"oldY": y,
 		"vx": vx,
 		"vy": vy,
 		"actions": [],
@@ -455,26 +457,60 @@ function thebeast_physics(scene)
 		var objects = scene.objects;
 		if (typeof loaded !== "boolean") {console.log(typeof loaded);}
 		if (typeof objects !== "object") {console.log(typeof objects);}
+		var players = scene.players;
+		if (typeof players !== "object") {console.log(typeof players);}
+		var cameras = scene.cameras;
+		if (typeof cameras !== "object") {console.log(typeof cameras);}
 		if (!loaded) {return;}
 	
+		// Update old position of objects.
 		var n = objects.length;
+		for (var i = 0; i < n; i++)
+		{
+			var obj = objects[i];
+			obj.oldX = obj.x;
+			obj.oldY = obj.y;
+		}
+		
+		// Update old position of players.
+		n = players.length;
+		for (var i = 0; i < n; i++)
+		{
+			var player = players[i];
+			player.oldX = player.x;
+			player.oldY = player.y;
+		}
+		
+		// Update old position of cameras.
+		n = cameras.length;
+		for (var i = 0; i < n; i++)
+		{
+			var camera = cameras[i];
+			camera.oldX = camera.x;
+			camera.oldY = camera.y;
+		}
+		
+		// Move objects.
+		n = objects.length;
 		for (var i = 0; i < n; i++)
 		{
 			var obj = objects[i];
 			thebeast_moveObject(obj);
 		}
 		
+		// Move players.
 		n = scene.players.length;
 		for (var i = 0; i < n; i++)
 		{
-			var player = scene.players[i];
+			var player = players[i];
 			thebeast_moveObject(player);
 		}
 		
+		// Move cameras.
 		n = scene.cameras.length;
 		for (var i = 0; i < n; i++)
 		{
-			var camera = scene.cameras[i];
+			var camera = cameras[i];
 			thebeast_moveObject(camera);
 		}
 		
