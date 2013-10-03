@@ -315,6 +315,29 @@ function thebeast_drawObject(context, obj)
 	}
 }
 
+function thebeast_paintList(scene)
+{
+	var list = [];
+	var n = scene.objects.length;
+	for (var i = 0; i < n; i++)
+	{
+		var obj = scene.objects[i];
+		list.push(obj);
+	}
+	
+	n = scene.players.length;
+	for (var i = 0; i < n; i++)
+	{
+		var player = scene.players[i];
+		list.push(player);
+	}
+	
+	list.sort(function(a, b) {
+		return a.y - b.y;
+	});
+	return list;
+}
+
 function thebeast_render(canvas, context, scene)
 {
 	if (typeof canvas !== "object") {console.log(typeof canvas);}
@@ -338,20 +361,12 @@ function thebeast_render(canvas, context, scene)
 		var y = Math.floor(-camera.y + 0.5 * h);
 		context.translate(x, y);
 	}
-
-	// Draw objects
-	var n = objs.length;
-	for (var i = 0; i < n; i++)
-	{
-		thebeast_drawObject(context, objs[i]);
-	}
 	
-	// Draw players.
-	n = scene.players.length;
+	var paintList = thebeast_paintList(scene);
+	var n = paintList.length;
 	for (var i = 0; i < n; i++)
 	{
-		var player = scene.players[i];
-		thebeast_drawObject(context, player);
+		thebeast_drawObject(context, paintList[i]);
 	}
 	
 	context.restore();
@@ -525,18 +540,10 @@ var thebeast = function()
 		var camera = scene.cameras[0];
 		var player = scene.players[0];
 		
-		thebeast_moveWithSpeed(player, 1, 100, 100);
-		thebeast_moveWithSpeed(player, 1, 200, 100);
-		thebeast_sendMessage(player, camera, "follow me", {target: player});
-		
-		thebeast_waitForMessage(camera, "follow me", function(msg) {
-			thebeast_followWithSpeed(camera, 0.2, msg.target, function(target) {
-				return false;
-			});
-		});
-		
-		thebeast_wait(player, 100);
-		thebeast_moveWithSpeed(player, 1, 20, 20);
+		thebeast_moveWithSpeed(player, 1, 200, 80);
+		thebeast_moveWithSpeed(player, 1, 0, 80);
+		thebeast_moveWithSpeed(player, 1, 200, 60);
+		thebeast_moveWithSpeed(player, 1, 0, 80);
 	});
 	
 	// Set rendering settings.
