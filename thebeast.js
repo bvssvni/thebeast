@@ -17,6 +17,8 @@ var thebeast_settings = {
 	"tree1Color": [0, 255, 0, 255],
 	"units": 64,
 	"cameraSpeed": 10,
+	"playerCollisionOffset": [0.25, 0.8, 0.25, 0],
+	"treeCollisionOffset": [0.25, 0.8, 0.25, 0],
 };
 var thebeast_images = null;
 var thebeast_image_sources = {
@@ -247,6 +249,7 @@ function thebeast_newScene(width, height, map, onload)
 		"time": 0,
 		"width": width,
 		"height": height,
+		"paused": false,
 	};
 }
 
@@ -449,10 +452,55 @@ function thebeast_render(canvas, context, scene)
 	context.restore();
 }
 
+// co - collision offset.
+function thebeast_doesCollide(objA, objB, coA, coB)
+{
+	if (typeof objA !== "object") {console.log(typeof objA);}
+	if (typeof objB !== "object") {console.log(typeof objB);}
+	if (typeof coA !== "object") {console.log(typeof coA);}
+	if (typeof coB !== "object") {console.log(typeof coB);}
+	
+	var units = thebeast_getSetting("units");
+	var aLeft = objA.x + coA[0] * units;
+	var aRight = objA.x + units - coA[2] * units;
+	var aTop = objA.y + coA[1] * units;
+	var aBottom = objA.y + units - coA[3] * units;
+	var bLeft = objB.x + coB[0] * units;
+	var bRight = objB.x + units - coB[2] * units;
+	var bTop = objB.y + coB[1] * units;
+	var bBottom = objB.y + units - coB[3] * units;
+	
+	return aLeft < bRight &&
+		aRight > bLeft &&
+		aTop < bBottom &&
+		aBottom > bTop;
+}
+
+// co - collision offset.
+// Moves object A such that it does not intersect with B.
+function thebeast_solveCollision(objA, objB, coA, coB)
+{
+	// Use old position of A because we need to separate A from B.
+	var units = thebeast_getSetting("units");
+	var aLeft = objA.oldX + coA[0] * units;
+	var aRight = objA.oldX + units - coA[2] * units;
+	var aTop = objA.oldY + coA[1] * units;
+	var aBottom = objA.oldY + units - coA[3] * units;
+	var bLeft = objB.x + coB[0] * units;
+	var bRight = objB.x + units - coB[2] * units;
+	var bTop = objB.y + coB[1] * units;
+	var bBottom = objB.y + units - coB[3] * units;
+	
+	objA.x = aRight < bLeft || aLeft > bRight ? objA.oldX : objA.x;
+	objA.y = aBottom < bTop || aTop > bBottom ? objA.oldY : objA.y;
+}
+
 function thebeast_physics(scene)
 {
 	if (typeof scene !== "object") {console.log(typeof scene);}
 	setInterval(function() {
+		if (scene.paused) {return;}
+	
 		var loaded = scene.loaded;
 		var objects = scene.objects;
 		if (typeof loaded !== "boolean") {console.log(typeof loaded);}
@@ -499,11 +547,39 @@ function thebeast_physics(scene)
 		}
 		
 		// Move players.
-		n = scene.players.length;
+		n = players.length;
 		for (var i = 0; i < n; i++)
 		{
 			var player = players[i];
 			thebeast_moveObject(player);
+		}
+		
+		n = players.length;
+		var m = objects.length;
+		var playerOffset = thebeast_getSetting("playerCollisionOffset");
+		var treeOffset = thebeast_getSetting("treeCollisionOffset");
+		var objOffset = null;
+		for (var i = 0; i < n; i++)
+		{
+			var player = players[i];
+			for (var j = 0; j < m; j++)
+			{
+				var obj = objects[j];
+				if (obj.type === "tree1")
+				{
+					objOffset = treeOffset;
+				}
+				else
+				{
+					continue;
+				}
+				
+				var collides = thebeast_doesCollide(player, obj, playerOffset, objOffset);
+				if (collides)
+				{
+					thebeast_solveCollision(player, obj, playerOffset, objOffset);
+				}
+			}
 		}
 		
 		// Move cameras.
@@ -676,7 +752,7 @@ var thebeast = function()
 		
 		thebeast_moveWithSpeed(player, 1, 200, 80);
 		thebeast_moveWithSpeed(player, 1, 0, 80);
-		thebeast_moveWithSpeed(player, 1, 200, 60);
+		thebeast_moveWithSpeed(player, 1, 200, 50);
 		thebeast_moveWithSpeed(player, 1, 0, 80);
 	};
 	
