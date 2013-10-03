@@ -766,6 +766,17 @@ function thebeast_mousePosition(canvas, scene, event)
 	return {x: x, y: y};
 }
 
+function thebeast_movePlayerToMousePosition(canvas, scene, event)
+{
+	var player = scene.players[0];
+	var pos = thebeast_mousePosition(canvas, scene, event);
+	var units = thebeast_getSetting("units");
+	var x = pos.x - 0.5 * units;
+	var y = pos.y - units;
+	player.actions = [];
+	thebeast_moveWithSpeed(player, 1, x, y);
+}
+
 var thebeast = function()
 {
 	var boxId = thebeast_getSetting("boxId");
@@ -791,17 +802,16 @@ var thebeast = function()
 		
 		thebeast_setCameraToObject(scene, camera, player);
 		
+		/*
 		thebeast_moveWithSpeed(player, 1, 200, 80);
 		thebeast_moveWithSpeed(player, 1, 0, 80);
 		thebeast_moveWithSpeed(player, 1, 200, 50);
 		thebeast_moveWithSpeed(player, 1, 0, 80);
+		*/
 	};
 	
 	var onmousedown = function(event) {
-		// TEST
-		console.log("mouse click");
-		var pos = thebeast_mousePosition(canvas, scene, event);
-		console.log(pos.x + " " + pos.y);
+		thebeast_movePlayerToMousePosition(canvas, scene, event);
 	};
 	canvas.addEventListener("mousedown", onmousedown, true);
 	
