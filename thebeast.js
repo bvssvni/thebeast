@@ -19,6 +19,7 @@ var thebeast_settings = {
 	"cameraSpeed": 10,
 	"playerCollisionOffset": [0.25, 0.8, 0.25, 0],
 	"treeCollisionOffset": [0.25, 0.8, 0.25, 0],
+	"box1CollisionOffset": [0, 0, 0, 0],
 };
 var thebeast_images = null;
 var thebeast_image_sources = {
@@ -491,8 +492,19 @@ function thebeast_solveCollision(objA, objB, coA, coB)
 	var bTop = objB.y + coB[1] * units;
 	var bBottom = objB.y + units - coB[3] * units;
 	
+	var ox = objA.x;
+	var oy = objA.y;
+	
 	objA.x = aRight < bLeft || aLeft > bRight ? objA.oldX : objA.x;
 	objA.y = aBottom < bTop || aTop > bBottom ? objA.oldY : objA.y;
+	
+	// If there is no change, we need to reset both old x and old y,
+	// because we are moving against a corner.
+	if (objA.x - ox === 0 && objA.y - oy === 0)
+	{
+		objA.x = objA.oldX;
+		objA.y = objA.oldY;
+	}
 }
 
 function thebeast_physics(scene)
@@ -558,6 +570,7 @@ function thebeast_physics(scene)
 		var m = objects.length;
 		var playerOffset = thebeast_getSetting("playerCollisionOffset");
 		var treeOffset = thebeast_getSetting("treeCollisionOffset");
+		var box1Offset = thebeast_getSetting("box1CollisionOffset");
 		var objOffset = null;
 		for (var i = 0; i < n; i++)
 		{
@@ -568,6 +581,10 @@ function thebeast_physics(scene)
 				if (obj.type === "tree1")
 				{
 					objOffset = treeOffset;
+				}
+				else if (obj.type === "box1")
+				{
+					objOffset = box1Offset;
 				}
 				else
 				{
