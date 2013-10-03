@@ -28,6 +28,17 @@ var thebeast_image_sources = {
 	"tree1": "./images/tree1.png",
 };
 var thebeast_scene = null;
+var thebeast_keyboardConfig = {
+	37: "playerTwo-left",
+	38: "playerTwo-up",
+	39: "playerTwo-right",
+	40: "playerTwo-down",
+	65: "playerOne-left",
+	68: "playerOne-right",
+	83: "playerOne-down",
+	87: "playerOne-up",
+};
+var thebeast_keyboardState = {};
 
 // These are actions that can be performed on objects.
 // An action returns true when it is completed.
@@ -143,6 +154,43 @@ function thebeast_getImage(id)
 	}
 	
 	return image;
+}
+
+function thebeast_getKeyboardConfig(keyCode)
+{
+	if (typeof keyCode !== "number") {console.log(typeof keyCode);}
+	var config = thebeast_keyboardConfig[keyCode];
+	if (config === null) {console.log("key code " + keyCode + " not listed in keyboard configuration");}
+	return config;
+}
+
+function thebeast_setKey(keyCode, val)
+{
+	if (typeof keyCode !== "number") {console.log(typeof keyCode);}
+	if (typeof val !== "boolean") {console.log(typeof val);}
+	
+	var config = thebeast_getKeyboardConfig(keyCode);
+	if (config === null) {return;}
+	if (val)
+	{
+		thebeast_keyboardState[config] = true;
+	}
+	else
+	{
+		delete thebeast_keyboardState[config];
+	}
+}
+
+function thebeast_isKeyPressed(config)
+{
+	if (typeof config !== "string") {console.log(typeof config);}
+	if (config.indexOf("playerOne-") === -1 && config.indexOf("playerTwo-") === -1)
+	{
+		return thebeast_isKeyPressed("playerOne-" + config) || thebeast_isKeyPressed("playerTwo-" + config);
+	}
+
+	var pressed = thebeast_keyboardState[config] ? true : false;
+	return pressed;
 }
 
 function thebeast_loadImages(sources, callback)
@@ -274,6 +322,8 @@ function thebeast_newObject(type, x, y, vx, vy, onidle)
 		"actions": [],
 		"messages": [],
 		"idle": onidle,
+		"leftRight": 0,
+		"upDown": 0,
 	};
 }
 
@@ -755,9 +805,9 @@ function thebeast_mousePosition(canvas, scene, event)
 {
 	if (typeof canvas !== "object") {console.log(typeof canvas);}
 	if (typeof scene !== "object") {console.log(typeof scene);}
+	event = event || window.event;
 	if (typeof event !== "object") {console.log(typeof event);}
 	
-	event = event || window.event;
 	var x = event.clientX - canvas.offsetLeft;
 	var y = event.clientY - canvas.offsetTop;
 	var camera = scene.cameras[scene.camera];
@@ -809,6 +859,20 @@ var thebeast = function()
 		thebeast_movePlayerToMousePosition(canvas, scene, event);
 	};
 	canvas.addEventListener("mousedown", onmousedown, true);
+	
+	var onkeydown = function(event) {
+		var event = event || window.event;
+		var keyCode = event.keyCode;
+		thebeast_setKey(keyCode, true);
+	};
+	window.addEventListener("keydown", onkeydown, false);
+	
+	var onkeyup = function(event) {
+		var event = event || window.event;
+		var keyCode = event.keyCode;
+		thebeast_setKey(keyCode, false);
+	};
+	window.addEventListener("keyup", onkeyup, false);
 	
 	// Load objects.
 	var scene = thebeast_newScene(canvas.width, canvas.height, "./images/map.png", onload);
