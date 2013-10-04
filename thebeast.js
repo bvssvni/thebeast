@@ -856,8 +856,8 @@ function thebeast_mousePosition(canvas, scene, event)
 	var x = event.clientX - canvas.offsetLeft;
 	var y = event.clientY - canvas.offsetTop;
 	var camera = scene.cameras[scene.camera];
-	x -= camera.x - 0.5 * scene.width;
-	y -= camera.y - 0.5 * scene.height;
+	x += camera.x - 0.5 * scene.width;
+	y += camera.y - 0.5 * scene.height;
 	return {x: x, y: y};
 }
 
