@@ -15,7 +15,7 @@ var thebeast_settings = {
 	"playerColor": [0, 0, 255, 255],
 	"box1Color": [255, 0, 0, 255],
 	"tree1Color": [0, 255, 0, 255],
-	"units": 64,
+	"units": 32,
 	"cameraSpeed": 10,
 	"playerMaxSpeed": 1,
 	"playerAcceleration": 0.5,
@@ -543,34 +543,61 @@ function thebeast_doesCollide(objA, objB, coA, coB)
 		aBottom > bTop;
 }
 
+// Computes the separation vector from a point to a line.
+function thebeast_separation(px, py, x, y, nx, ny)
+{
+	var dx = x - px;
+	var dy = y - py;
+	var dot = dx * nx + dy * ny;
+	return {x: dx - dot * nx, y: dy - dot * ny};
+}
+
+// Returns the least seperation of four given a displacement.
+// Each separation can be computed using 'seperation' function.
+// The dot product with the displacement,
+// is less for the separation with small magnitue and in opposite direction.
+// The seperation returned can be used to correct collision with rectangles.
+function thebeast_leastSeparation4(sep1, sep2, sep3, sep4)
+{
+	var dot1 = sep1.x * sep1.x + sep1.y * sep1.y;
+	var dot2 = sep2.x * sep2.x + sep2.y * sep2.y;
+	var dot3 = sep3.x * sep3.x + sep3.y * sep3.y;
+	var dot4 = sep4.x * sep4.x + sep4.y * sep4.y;
+	return dot1 < dot2 ?
+		(dot3 < dot4 ?
+			(dot1 < dot3 ? sep1 : sep3) :
+			(dot1 < dot4 ? sep1 : sep4)
+		) :
+		(dot3 < dot4 ?
+			(dot2 < dot3 ? sep2 : sep3) :
+			(dot2 < dot4 ? sep2 : sep4)
+		);
+}
+
 // co - collision offset.
 // Moves object A such that it does not intersect with B.
 function thebeast_solveCollision(objA, objB, coA, coB)
 {
-	// Use old position of A because we need to separate A from B.
 	var units = thebeast_getSetting("units");
-	var aLeft = objA.oldX + coA[0] * units;
-	var aRight = objA.oldX + units - coA[2] * units;
-	var aTop = objA.oldY + coA[1] * units;
-	var aBottom = objA.oldY + units - coA[3] * units;
-	var bLeft = objB.x + coB[0] * units;
-	var bRight = objB.x + units - coB[2] * units;
-	var bTop = objB.y + coB[1] * units;
-	var bBottom = objB.y + units - coB[3] * units;
+	var left = objB.x + coB[0] * units - units + coA[2] * units;
+	var top = objB.y + coB[1] * units - units + coA[3] * units;
+	var right = objB.x - coB[2] * units + units - coA[0] * units;
+	var bottom = objB.y - coB[3] * units + units - coA[1] * units;
 	
-	var ox = objA.x;
-	var oy = objA.y;
+	var x = objA.x;
+	var y = objA.y;
 	
-	objA.x = aRight < bLeft || aLeft > bRight ? objA.oldX : objA.x;
-	objA.y = aBottom < bTop || aTop > bBottom ? objA.oldY : objA.y;
+	var topSep = thebeast_separation(x, y, left, top, 1, 0);
+	var rightSep = thebeast_separation(x, y, right, top, 0, 1);
+	var bottomSep = thebeast_separation(x, y, right, bottom, -1, 0);
+	var leftSep = thebeast_separation(x, y, left, top, 0, 1);
 	
-	// If there is no change, we need to reset both old x and old y,
-	// because we are moving against a corner.
-	if (objA.x - ox === 0 && objA.y - oy === 0)
-	{
-		objA.x = objA.oldX;
-		objA.y = objA.oldY;
-	}
+	var minSep = thebeast_leastSeparation4(topSep, rightSep, bottomSep, leftSep);
+	
+	objA.x += minSep.x;
+	objA.y += minSep.y;
+	objA.vx += minSep.x;
+	objA.vy += minSep.y;
 }
 
 function thebeast_collision(scene)
