@@ -87,7 +87,7 @@ var thebeast_actions = {
 		var dx = args.x - obj.x;
 		var dy = args.y - obj.y;
 		var d = Math.sqrt(dx * dx + dy * dy);
-		if (d === 0) {return true;}
+		if (Math.abs(d) < 0.001) {return true;}
 		
 		var speed = Math.min(args.speed, d);
 		obj.x += dx * speed / d;
@@ -103,7 +103,7 @@ var thebeast_actions = {
 		var dx = args.target.x - obj.x;
 		var dy = args.target.y - obj.y;
 		var d = Math.sqrt(dx * dx + dy * dy);
-		if (d === 0) {return args.callback(args.target);}
+		if (Math.abs(d) < 0.001) {return args.callback(args.target);}
 		
 		var speed = Math.min(args.speed, d);
 		obj.x += dx * speed / d;
