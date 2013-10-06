@@ -26,6 +26,9 @@ var thebeast_settings = {
 var thebeast_images = null;
 var thebeast_image_sources = {
 	"thebeast-front": "./images/thebeast-front.png",
+	"thebeast-back": "./images/thebeast-back.png",
+	"thebeast-left": "./images/thebeast-left.png",
+	"thebeast-right": "./images/thebeast-right.png",
 	"box1": "./images/box1.png",
 	"tree1": "./images/tree1.png",
 };
@@ -326,20 +329,22 @@ function thebeast_newObject(type, x, y, vx, vy)
 	if (typeof vy !== "number") {console.log(typeof vy);}
 	
 	return {
-		"type": type,
-		"x": x,
-		"y": y,
-		"oldX": x,
-		"oldY": y,
-		"vx": vx,
-		"vy": vy,
-		"actions": [],
-		"messages": [],
-		"idle": null,
-		"leftRight": 0,
-		"upDown": 0,
-		"maxSpeedLeftRight": 0,
-		"maxSpeedUpDown": 0,
+		type: type,
+		x: x,
+		y: y,
+		oldX: x,
+		oldY: y,
+		vx: vx,
+		vy: vy,
+		dirX: 0,
+		dirY: 1,
+		actions: [],
+		messages: [],
+		idle: null,
+		leftRight: 0,
+		upDown: 0,
+		maxSpeedLeftRight: 0,
+		maxSpeedUpDown: 0,
 	};
 }
 
@@ -435,7 +440,11 @@ function thebeast_drawObject(context, scene, obj)
 	var units = thebeast_getSetting("units");
 	if (obj.type === "theBeast")
 	{
-		var image = thebeast_getImage("thebeast-front");
+		var image = null;
+		if (obj.dirY > 0) {image = thebeast_getImage("thebeast-front");}
+		else if (obj.dirY < 0) {image = thebeast_getImage("thebeast-back");}
+		else if (obj.dirX > 0) {image = thebeast_getImage("thebeast-right");}
+		else {image = thebeast_getImage("thebeast-left");}
 		context.drawImage(image, obj.x, obj.y, units, units);
 	}
 	else if (obj.type === "box1")
@@ -665,13 +674,20 @@ function thebeast_physics(scene)
 			obj.oldY = obj.y;
 		}
 		
-		// Update old position of players.
 		n = players.length;
 		for (var i = 0; i < n; i++)
 		{
+			// Update old position of players.
 			var player = players[i];
 			player.oldX = player.x;
 			player.oldY = player.y;
+			
+			// Update direction by input.
+			if (player.leftRight !== 0 || player.upDown !== 0)
+			{
+				player.dirX = player.leftRight;
+				player.dirY = player.upDown;
+			}
 		}
 		
 		// Update old position of cameras.
