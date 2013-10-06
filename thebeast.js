@@ -17,7 +17,7 @@ var thebeast_settings = {
 	"tree1Color": [0, 255, 0, 255],
 	"units": 32,
 	"cameraSpeed": 10,
-	"playerMaxSpeed": 1,
+	"playerMaxSpeed": 0.03125,
 	"playerAcceleration": 0.5,
 	"playerCollisionOffset": [0.25, 0.8, 0.25, 0],
 	"treeCollisionOffset": [0.4, 0.8, 0.4, 0],
@@ -252,7 +252,7 @@ function thebeast_loadMap(scene, map)
 	var playerColor = thebeast_getSetting("playerColor");
 	var tree1Color = thebeast_getSetting("tree1Color");
 	var units = thebeast_getSetting("units");
-	var playerMaxSpeed = thebeast_getSetting("playerMaxSpeed");
+	var playerMaxSpeed = thebeast_getSetting("playerMaxSpeed") * units;
 	for (var x = 0; x < w; x++)
 	{
 		for (var y = 0; y < h; y++)
@@ -958,7 +958,7 @@ var thebeast = function()
 	};
 	
 	var onmousedown = function(event) {
-		thebeast_movePlayerToMousePosition(canvas, scene, event);
+	
 	};
 	canvas.addEventListener("mousedown", onmousedown, true);
 	
