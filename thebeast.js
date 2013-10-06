@@ -253,6 +253,7 @@ function thebeast_loadMap(scene, map)
 	var tree1Color = thebeast_getSetting("tree1Color");
 	var units = thebeast_getSetting("units");
 	var playerMaxSpeed = thebeast_getSetting("playerMaxSpeed") * units;
+	var playerAcceleration = thebeast_getSetting("playerAcceleration");
 	for (var x = 0; x < w; x++)
 	{
 		for (var y = 0; y < h; y++)
@@ -266,16 +267,16 @@ function thebeast_loadMap(scene, map)
 			else if (thebeast_compareColors(playerColor, color))
 			{
 				var player = thebeast_newObject("theBeast", x * units, y * units, 0, 0);
-				player.maxSpeedLeftRight = playerMaxSpeed;
-				player.maxSpeedUpDown = playerMaxSpeed;
 				
 				// Move player with keyboard.
 				player.idle = function() {
-					var vx = player.maxSpeedLeftRight * player.leftRight;
-					var vy = player.maxSpeedUpDown * player.upDown;
-					var acc = thebeast_getSetting("playerAcceleration");
-					player.vx += acc * (vx - player.vx);
-					player.vy += acc * (vy - player.vy);
+					var vx = player.leftRight;
+					var vy = player.upDown;
+					var v = Math.sqrt(vx * vx + vy * vy) / playerMaxSpeed;
+					vx = v === 0 ? 0 : vx / v;
+					vy = v === 0 ? 0 : vy / v;
+					player.vx += playerAcceleration * (vx - player.vx);
+					player.vy += playerAcceleration * (vy - player.vy);
 				};
 				
 				scene.players.push(player);
@@ -343,8 +344,6 @@ function thebeast_newObject(type, x, y, vx, vy)
 		idle: null,
 		leftRight: 0,
 		upDown: 0,
-		maxSpeedLeftRight: 0,
-		maxSpeedUpDown: 0,
 	};
 }
 
