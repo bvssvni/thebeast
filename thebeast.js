@@ -23,6 +23,7 @@ var thebeast_settings = {
 	"treeCollisionOffset": [0.4, 0.8, 0.4, 0],
 	"box1CollisionOffset": [0, 0, 0, 0],
 };
+// These images are set once through loading.
 var thebeast_images = null;
 var thebeast_image_sources = {
 	"thebeast-front": "./images/thebeast-front.png",
@@ -32,7 +33,6 @@ var thebeast_image_sources = {
 	"box1": "./images/box1.png",
 	"tree1": "./images/tree1.png",
 };
-var thebeast_scene = null;
 var thebeast_keyboardConfig = {
 	37: "playerTwo-left",
 	38: "playerTwo-up",
