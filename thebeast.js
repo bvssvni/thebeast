@@ -147,9 +147,12 @@ var thebeast_actions = {
 	},
 }
 
-function thebeast_getObjectType(str)
+function thebeast_getObjectType(settings, str)
 {
-	var type = thebeast_settings.objectTypes[str];
+	if (typeof settings !== "object") {console.log(typeof settings);}
+	if (typeof str !== "string") {console.log(typeof str);}
+	
+	var type = settings.objectTypes[str];
 	if (type !== true)
 	{
 		console.log("Could not find type " + str + " listed in object types");
@@ -159,9 +162,12 @@ function thebeast_getObjectType(str)
 	return str;
 }
 
-function thebeast_getSetting(id)
+function thebeast_getSetting(settings, id)
 {
-	var setting = thebeast_settings[id];
+	if (typeof settings !== "object") {console.log(settings);}
+	if (typeof id !== "string") {console.log(id);}
+
+	var setting = settings[id];
 	if (setting === null)
 	{
 		console.log("Setting " + id + " is not listed in settings");
@@ -170,9 +176,12 @@ function thebeast_getSetting(id)
 	return setting;
 }
 
-function thebeast_getImage(id)
+function thebeast_getImage(settings, id)
 {
-	var image = thebeast_settings.images[id];
+	if (typeof settings !== "object") {console.log(settings);}
+	if (typeof id !== "string") {console.log(id);}
+
+	var image = settings.images[id];
 	if (image === null)
 	{
 		console.log("Image " + id + " is not listed among images");
@@ -181,20 +190,22 @@ function thebeast_getImage(id)
 	return image;
 }
 
-function thebeast_getKeyboardConfig(keyCode)
+function thebeast_getKeyboardConfig(settings, keyCode)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof keyCode !== "number") {console.log(typeof keyCode);}
-	var config = thebeast_settings.keyboardConfig[keyCode];
+	var config = settings.keyboardConfig[keyCode];
 	if (config === null) {console.log("key code " + keyCode + " not listed in keyboard configuration");}
 	return config;
 }
 
-function thebeast_setKey(keyCode, val)
+function thebeast_setKey(settings, keyCode, val)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof keyCode !== "number") {console.log(typeof keyCode);}
 	if (typeof val !== "boolean") {console.log(typeof val);}
 	
-	var config = thebeast_getKeyboardConfig(keyCode);
+	var config = thebeast_getKeyboardConfig(settings, keyCode);
 	if (config === null) {return;}
 	if (val)
 	{
@@ -248,17 +259,18 @@ function thebeast_compareColors(a, b)
 		a[3] === b[3];
 }
 
-function thebeast_addObjectToScene(scene, obj)
+function thebeast_addObjectToScene(settings, scene, obj)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof scene !== "object") {console.log(typeof scene);}
 	if (typeof obj !== "object") {console.log(typeof obj);}
 
-	var playerObjectType = thebeast_getObjectType("theBeast");
-	var box1ObjectType = thebeast_getObjectType("box1");
-	var tree1ObjectType = thebeast_getObjectType("tree1");
-	var units = thebeast_getSetting("units");
-	var playerMaxSpeed = thebeast_getSetting("playerMaxSpeed") * units;
-	var playerAcceleration = thebeast_getSetting("playerAcceleration");
+	var playerObjectType = thebeast_getObjectType(settings, "theBeast");
+	var box1ObjectType = thebeast_getObjectType(settings, "box1");
+	var tree1ObjectType = thebeast_getObjectType(settings, "tree1");
+	var units = thebeast_getSetting(settings, "units");
+	var playerMaxSpeed = thebeast_getSetting(settings, "playerMaxSpeed") * units;
+	var playerAcceleration = thebeast_getSetting(settings, "playerAcceleration");
 		
 	if (obj.type === playerObjectType)
 	{
@@ -287,14 +299,17 @@ function thebeast_addObjectToScene(scene, obj)
 	}
 }
 
-function thebeast_objectTypeFromColor(color)
+function thebeast_objectTypeFromColor(settings, color)
 {
-	var box1Color = thebeast_getSetting("box1Color");
-	var playerColor = thebeast_getSetting("playerColor");
-	var tree1Color = thebeast_getSetting("tree1Color");
-	var box1Type = thebeast_getObjectType("box1");
-	var tree1Type = thebeast_getObjectType("tree1");
-	var playerType = thebeast_getObjectType("theBeast");
+	if (typeof settings !== "object") {console.log(typeof settings);}
+	if (typeof color !== "object") {console.log(typeof color);}
+	
+	var box1Color = thebeast_getSetting(settings, "box1Color");
+	var playerColor = thebeast_getSetting(settings, "playerColor");
+	var tree1Color = thebeast_getSetting(settings, "tree1Color");
+	var box1Type = thebeast_getObjectType(settings, "box1");
+	var tree1Type = thebeast_getObjectType(settings, "tree1");
+	var playerType = thebeast_getObjectType(settings, "theBeast");
 	if (thebeast_compareColors([0, 0, 0, 0], color)) {return null;}
 	else if (thebeast_compareColors(box1Color, color)) {return box1Type;}
 	else if (thebeast_compareColors(playerColor, color)) {return playerType;}
@@ -302,8 +317,9 @@ function thebeast_objectTypeFromColor(color)
 	else {console.log("Unknown color [" + color[0] + "," + color[1] + "," + color[2] + "," + color[3] + "]");}
 }
 
-function thebeast_loadMap(scene, map)
+function thebeast_loadMap(settings, scene, map)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof scene !== "object") {console.log(typeof scene);}
 	if (typeof map !== "object") {console.log(typeof map);}
 
@@ -322,17 +338,17 @@ function thebeast_loadMap(scene, map)
 	var data = context.getImageData(0, 0, w, h).data;
 	if (typeof data !== "object") {console.log(typeof data);}
 	
-	var units = thebeast_getSetting("units");
+	var units = thebeast_getSetting(settings, "units");
 	for (var x = 0; x < w; x++)
 	{
 		for (var y = 0; y < h; y++)
 		{
 			var i = x + w * y;
 			var color = [data[i*4+0], data[i*4+1], data[i*4+2], data[i*4+3]];
-			var type = thebeast_objectTypeFromColor(color);
+			var type = thebeast_objectTypeFromColor(settings, color);
 			if (type === null) {continue;}
 			var obj = thebeast_newObject(type, x * units, y * units, 0, 0);
-			thebeast_addObjectToScene(scene, obj);
+			thebeast_addObjectToScene(settings, scene, obj);
 		}
 	}
 	
@@ -436,21 +452,26 @@ function thebeast_cameraView(scene, camera)
 	return [x, y, x + scene.width, y + scene.height];
 }
 
-function thebeast_outsideCameraView(cameraView, obj)
+function thebeast_outsideCameraView(settings, cameraView, obj)
 {
-	var units = thebeast_getSetting("units");
+	if (typeof settings !== "object") {console.log(typeof settings);}
+	if (typeof cameraView !== "object") {console.log(typeof camereaView);}
+	if (typeof obj !== "object") {console.log(typeof obj);}
+	
+	var units = thebeast_getSetting(settings, "units");
 	return obj.x + units <= cameraView[0] ||
 		obj.y + units <= cameraView[1] ||
 		obj.x >= cameraView[2] ||
 		obj.y >= cameraView[3];
 }
 
-function thebeast_cover(objA, objB)
+function thebeast_cover(settings, objA, objB)
 {
+	if (typeof settings !== "object") {console.log(settings);}
 	if (typeof objA !== "object") {console.log(typeof objA);}
 	if (typeof objB !== "object") {console.log(typeof objB);}
 	
-	var units = thebeast_getSetting("units");
+	var units = thebeast_getSetting(settings, "units");
 	var intersectsX = objA.x + units >= objB.x && objA.x <= objB.x + units;
 	var intersectsY = objA.y + units >= objB.y && objA.y <= objB.y + units;
 	if (!intersectsX || !intersectsY) {return 0;}
@@ -462,8 +483,12 @@ function thebeast_cover(objA, objB)
 	return coverX * coverY;
 }
 
-function thebeast_playerCover(players, obj)
+function thebeast_playerCover(settings, players, obj)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
+	if (typeof players !== "object") {console.log(typeof players);}
+	if (typeof obj !== "object") {console.log(typeof obj);}
+
 	var maxCover = 0;
 	var n = players.length;
 	for (var i = 0; i < n; i++)
@@ -471,42 +496,43 @@ function thebeast_playerCover(players, obj)
 		var player = players[i];
 		if (player.y > obj.y) {continue;}
 		
-		var cover = thebeast_cover(player, obj);
+		var cover = thebeast_cover(settings, player, obj);
 		maxCover = Math.max(maxCover, cover);
 	}
 	
 	return maxCover;
 }
 
-function thebeast_drawObject(context, scene, obj)
+function thebeast_drawObject(settings, context, scene, obj)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof context !== "object") {console.log(typeof context);}
 	if (typeof scene !== "object") {console.log(typeof scene);}
 	if (typeof obj !== "object") {console.log(typeof obj);}
 	
-	var units = thebeast_getSetting("units");
-	var playerType = thebeast_getObjectType("theBeast");
-	var box1Type = thebeast_getObjectType("box1");
-	var tree1Type = thebeast_getObjectType("tree1");
+	var units = thebeast_getSetting(settings, "units");
+	var playerType = thebeast_getObjectType(settings, "theBeast");
+	var box1Type = thebeast_getObjectType(settings, "box1");
+	var tree1Type = thebeast_getObjectType(settings, "tree1");
 	if (obj.type === playerType)
 	{
 		var image = null;
-		if (obj.dirY > 0) {image = thebeast_getImage("thebeast-front");}
-		else if (obj.dirY < 0) {image = thebeast_getImage("thebeast-back");}
-		else if (obj.dirX > 0) {image = thebeast_getImage("thebeast-right");}
-		else {image = thebeast_getImage("thebeast-left");}
+		if (obj.dirY > 0) {image = thebeast_getImage(settings, "thebeast-front");}
+		else if (obj.dirY < 0) {image = thebeast_getImage(settings, "thebeast-back");}
+		else if (obj.dirX > 0) {image = thebeast_getImage(settings, "thebeast-right");}
+		else {image = thebeast_getImage(settings, "thebeast-left");}
 		context.drawImage(image, obj.x, obj.y, units, units);
 	}
 	else if (obj.type === box1Type)
 	{
-		var image = thebeast_getImage("box1");
+		var image = thebeast_getImage(settings, "box1");
 		context.drawImage(image, obj.x, obj.y, units, units);
 	}
 	else if (obj.type === tree1Type)
 	{
 		// Detect cover with player.
-		var cover = thebeast_playerCover(scene.players, obj);
-		var image = thebeast_getImage("tree1");
+		var cover = thebeast_playerCover(settings, scene.players, obj);
+		var image = thebeast_getImage(settings, "tree1");
 		if (cover > 0)
 		{
 			context.save();
@@ -544,8 +570,9 @@ function thebeast_paintList(scene)
 	return list;
 }
 
-function thebeast_render(canvas, context, scene)
+function thebeast_render(settings, canvas, context, scene)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof canvas !== "object") {console.log(typeof canvas);}
 	if (typeof context !== "object") {console.log(typeof context);}
 	if (typeof scene !== "object") {console.log(typeof scene);}
@@ -572,21 +599,22 @@ function thebeast_render(canvas, context, scene)
 	var n = paintList.length;
 	for (var i = 0; i < n; i++)
 	{
-		thebeast_drawObject(context, scene, paintList[i]);
+		thebeast_drawObject(settings, context, scene, paintList[i]);
 	}
 	
 	context.restore();
 }
 
 // co - collision offset.
-function thebeast_doesCollide(objA, objB, coA, coB)
+function thebeast_doesCollide(settings, objA, objB, coA, coB)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof objA !== "object") {console.log(typeof objA);}
 	if (typeof objB !== "object") {console.log(typeof objB);}
 	if (typeof coA !== "object") {console.log(typeof coA);}
 	if (typeof coB !== "object") {console.log(typeof coB);}
 	
-	var units = thebeast_getSetting("units");
+	var units = thebeast_getSetting(settings, "units");
 	var aLeft = objA.x + coA[0] * units;
 	var aRight = objA.x + units - coA[2] * units;
 	var aTop = objA.y + coA[1] * units;
@@ -635,9 +663,15 @@ function thebeast_leastSeparation4(sep1, sep2, sep3, sep4)
 
 // co - collision offset.
 // Moves object A such that it does not intersect with B.
-function thebeast_solveCollision(objA, objB, coA, coB)
+function thebeast_solveCollision(settings, objA, objB, coA, coB)
 {
-	var units = thebeast_getSetting("units");
+	if (typeof settings !== "object") {console.log(typeof settings);}
+	if (typeof objA !== "object") {console.log(typeof objA);}
+	if (typeof objB !== "object") {console.log(typeof objB);}
+	if (typeof coA !== "object") {console.log(typeof coA);}
+	if (typeof coB !== "object") {console.log(typeof coB);}
+
+	var units = thebeast_getSetting(settings, "units");
 	var left = objB.x + coB[0] * units - units + coA[2] * units;
 	var top = objB.y + coB[1] * units - units + coA[3] * units;
 	var right = objB.x - coB[2] * units + units - coA[0] * units;
@@ -659,19 +693,20 @@ function thebeast_solveCollision(objA, objB, coA, coB)
 	objA.vy += minSep.y;
 }
 
-function thebeast_collision(scene)
+function thebeast_collision(settings, scene)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof scene !== "object") {console.log(typeof scene);}
 
 	var players = scene.players;
 	var objects = scene.objects;
 	var n = players.length;
 	var m = objects.length;
-	var playerOffset = thebeast_getSetting("playerCollisionOffset");
-	var treeOffset = thebeast_getSetting("treeCollisionOffset");
-	var box1Offset = thebeast_getSetting("box1CollisionOffset");
-	var box1Type = thebeast_getObjectType("box1");
-	var tree1Type = thebeast_getObjectType("tree1");
+	var playerOffset = thebeast_getSetting(settings, "playerCollisionOffset");
+	var treeOffset = thebeast_getSetting(settings, "treeCollisionOffset");
+	var box1Offset = thebeast_getSetting(settings, "box1CollisionOffset");
+	var box1Type = thebeast_getObjectType(settings, "box1");
+	var tree1Type = thebeast_getObjectType(settings, "tree1");
 	var objOffset = null;
 	for (var i = 0; i < n; i++)
 	{
@@ -692,17 +727,18 @@ function thebeast_collision(scene)
 				continue;
 			}
 			
-			var collides = thebeast_doesCollide(player, obj, playerOffset, objOffset);
+			var collides = thebeast_doesCollide(settings, player, obj, playerOffset, objOffset);
 			if (collides)
 			{
-				thebeast_solveCollision(player, obj, playerOffset, objOffset);
+				thebeast_solveCollision(settings, player, obj, playerOffset, objOffset);
 			}
 		}
 	}
 }
 
-function thebeast_physics(scene)
+function thebeast_physics(settings, scene)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof scene !== "object") {console.log(typeof scene);}
 	setInterval(function() {
 		if (scene.paused) {return;}
@@ -767,7 +803,7 @@ function thebeast_physics(scene)
 			thebeast_moveObject(player);
 		}
 		
-		thebeast_collision(scene);
+		thebeast_collision(settings, scene);
 		
 		// Move cameras.
 		n = scene.cameras.length;
@@ -778,11 +814,12 @@ function thebeast_physics(scene)
 		}
 		
 		scene.time++;
-	}, thebeast_getSetting("moveInterval"));
+	}, thebeast_getSetting(settings, "moveInterval"));
 }
 
-function thebeast_graphics(canvas, context, scene)
+function thebeast_graphics(settings, canvas, context, scene)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof canvas !== "object") {console.log(typeof canvas);}
 	if (typeof context !== "object") {console.log(typeof context);}
 	if (typeof scene !== "object") {console.log(typeof scene);}
@@ -791,8 +828,8 @@ function thebeast_graphics(canvas, context, scene)
 		var loaded = scene.loaded;
 		if (!loaded) {return;}
 		
-		thebeast_render(canvas, context, scene);
-	}, thebeast_getSetting("renderInterval"));
+		thebeast_render(settings, canvas, context, scene);
+	}, thebeast_getSetting(settings, "renderInterval"));
 }
 
 function thebeast_updateSceneState(scene)
@@ -802,19 +839,20 @@ function thebeast_updateSceneState(scene)
 	scene.loaded = scene.loadedImages && scene.loadedMap;
 }
 
-function thebeast_load(scene)
+function thebeast_load(settings, scene)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof scene !== "object") {console.log(typeof scene);}
 
-	var imageSources = thebeast_settings.imageSources;
+	var imageSources = settings.imageSources;
 	thebeast_loadImages({"map": scene.map}, function(images) {
 		var map = images.map;
-		thebeast_loadMap(scene, map);
+		thebeast_loadMap(settings, scene, map);
 		scene.loadedMap = true;
 		thebeast_updateSceneState(scene);
 	});
 	thebeast_loadImages(imageSources, function(images) {
-		thebeast_settings.images = images;
+		settings.images = images;
 		scene.loadedImages = true;
 		thebeast_updateSceneState(scene);
 	});
@@ -906,11 +944,16 @@ function thebeast_setCameraToObject(scene, camera, obj)
 	thebeast_setPosition(camera, 0, x, y);
 }
 
-function thebeast_moveCameraToObject(scene, camera, obj)
+function thebeast_moveCameraToObject(settings, scene, camera, obj)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
+	if (typeof scene !== "object") {console.log(typeof scene);}
+	if (typeof camera !== "object") {console.log(typeof camera);}
+	if (typeof obj !== "object") {console.log(typeof obj);}
+	
 	var x = obj.x - (obj.x % scene.width) + 0.5 * scene.width;
 	var y = obj.y - (obj.y % scene.height) + 0.5 * scene.height;
-	var cameraSpeed = thebeast_getSetting("cameraSpeed");
+	var cameraSpeed = thebeast_getSetting(settings, "cameraSpeed");
 	thebeast_moveWithSpeed(camera, cameraSpeed, x, y);
 }
 
@@ -929,27 +972,35 @@ function thebeast_mousePosition(canvas, scene, event)
 	return {x: x, y: y};
 }
 
-function thebeast_movePlayerToMousePosition(canvas, scene, event)
+function thebeast_movePlayerToMousePosition(settings, canvas, scene, event)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
+	if (typeof canvas !== "object") {console.log(typeof canvas);}
+	if (typeof scene !== "object") {console.log(typeof scene);}
+	if (typeof event !== "object") {console.log(typeof event);}
+
 	var player = scene.players[0];
 	var pos = thebeast_mousePosition(canvas, scene, event);
-	var units = thebeast_getSetting("units");
+	var units = thebeast_getSetting(settings, "units");
 	var x = pos.x - 0.5 * units;
 	var y = pos.y - units;
 	player.actions = [];
 	thebeast_moveWithSpeed(player, 1, x, y);
 }
 
-function thebeast_createSlideCamera(scene)
+function thebeast_createSlideCamera(settings, scene)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
+	if (typeof scene !== "object") {console.log(typeof scene);}
+
 	var player = scene.players[0];
 	thebeast_addCamera(scene, 0, 0, function() {
 		var camera = scene.cameras[0];
 		var cameraView = thebeast_cameraView(scene, camera);
-		var playerOutside = thebeast_outsideCameraView(cameraView, player);
+		var playerOutside = thebeast_outsideCameraView(settings, cameraView, player);
 		if (!playerOutside) {return;}
 		
-		thebeast_moveCameraToObject(scene, camera, player);
+		thebeast_moveCameraToObject(settings, scene, camera, player);
 	});
 	var camera = scene.cameras[0];
 	
@@ -977,13 +1028,14 @@ function thebeast_updatePlayerInput(scene)
 	player.upDown = upDown;
 }
 
-function thebeast_keyboard(scene)
+function thebeast_keyboard(settings, scene)
 {
+	if (typeof settings !== "object") {console.log(typeof settings);}
 	if (typeof scene !== "object") {console.log(typeof scene);}
 	var onkeydown = function(event) {
 		var event = event || window.event;
 		var keyCode = event.keyCode;
-		thebeast_setKey(keyCode, true);
+		thebeast_setKey(settings, keyCode, true);
 		thebeast_updatePlayerInput(scene);
 	};
 	window.addEventListener("keydown", onkeydown, false);
@@ -991,7 +1043,7 @@ function thebeast_keyboard(scene)
 	var onkeyup = function(event) {
 		var event = event || window.event;
 		var keyCode = event.keyCode;
-		thebeast_setKey(keyCode, false);
+		thebeast_setKey(settings, keyCode, false);
 		thebeast_updatePlayerInput(scene);
 	};
 	window.addEventListener("keyup", onkeyup, false);
@@ -999,14 +1051,15 @@ function thebeast_keyboard(scene)
 
 var thebeast = function()
 {
-	var boxId = thebeast_getSetting("boxId");
+	var settings = thebeast_settings;
+	var boxId = thebeast_getSetting(settings, "boxId");
 	var canvas = document.getElementById(boxId);
 	if (typeof canvas !== "object") {console.log(typeof canvas);}
 	var context = canvas.getContext('2d');
 	if (typeof context !== "object") {console.log(typeof context);}
 	
 	var onload = function() {
-		thebeast_createSlideCamera(scene);
+		thebeast_createSlideCamera(settings, scene);
 	};
 	
 	var onmousedown = function(event) {
@@ -1018,20 +1071,20 @@ var thebeast = function()
 	var scene = thebeast_newScene(canvas.width, canvas.height, "./images/map.png", onload);
 	
 	// Handle keyboard input.
-	thebeast_keyboard(scene);
+	thebeast_keyboard(settings, scene);
 	
 	// Set rendering settings.
 	thebeast_setSmoothing(context, false);
 	
 	// Physics.
 	var loaded = false;
-	thebeast_physics(scene);
+	thebeast_physics(settings, scene);
 	
 	// Graphics.
-	thebeast_graphics(canvas, context, scene);
+	thebeast_graphics(settings, canvas, context, scene);
 	
 	// Load assets.
-	thebeast_load(scene);
+	thebeast_load(settings, scene);
 }
 
 window.addEventListener("load", thebeast, true);
