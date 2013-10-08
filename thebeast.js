@@ -44,6 +44,11 @@ var thebeast_keyboardConfig = {
 	87: "playerOne-up",
 };
 var thebeast_keyboardState = {};
+var thebeast_objectTypes = {
+	box1: true,
+	tree1: true,
+	theBeast: true,
+};
 
 // These are actions that can be performed on objects.
 // An action returns true when it is completed.
@@ -137,6 +142,18 @@ var thebeast_actions = {
 		args.callback(message.body);
 		return true;
 	},
+}
+
+function thebeast_getObjectType(str)
+{
+	var type = thebeast_objectTypes[str];
+	if (type !== true)
+	{
+		console.log("Could not find type " + str + " listed in object types");
+		console.log(type);
+	}
+	
+	return str;
 }
 
 function thebeast_getSetting(id)
@@ -251,6 +268,9 @@ function thebeast_loadMap(scene, map)
 	var box1Color = thebeast_getSetting("box1Color");
 	var playerColor = thebeast_getSetting("playerColor");
 	var tree1Color = thebeast_getSetting("tree1Color");
+	var box1Type = thebeast_getObjectType("box1");
+	var tree1Type = thebeast_getObjectType("tree1");
+	var playerType = thebeast_getObjectType("theBeast");
 	var units = thebeast_getSetting("units");
 	var playerMaxSpeed = thebeast_getSetting("playerMaxSpeed") * units;
 	var playerAcceleration = thebeast_getSetting("playerAcceleration");
@@ -262,11 +282,11 @@ function thebeast_loadMap(scene, map)
 			var color = [data[i*4+0], data[i*4+1], data[i*4+2], data[i*4+3]];
 			if (thebeast_compareColors(box1Color, color))
 			{
-				scene.objects.push(thebeast_newObject("box1", x * units, y * units, 0, 0));
+				scene.objects.push(thebeast_newObject(box1Type, x * units, y * units, 0, 0));
 			}
 			else if (thebeast_compareColors(playerColor, color))
 			{
-				var player = thebeast_newObject("theBeast", x * units, y * units, 0, 0);
+				var player = thebeast_newObject(playerType, x * units, y * units, 0, 0);
 				
 				// Move player with keyboard.
 				player.idle = function() {
@@ -283,7 +303,7 @@ function thebeast_loadMap(scene, map)
 			}
 			else if (thebeast_compareColors(tree1Color, color))
 			{
-				scene.objects.push(thebeast_newObject("tree1", x * units, y * units, 0, 0));
+				scene.objects.push(thebeast_newObject(tree1Type, x * units, y * units, 0, 0));
 			}
 		}
 	}
@@ -437,7 +457,10 @@ function thebeast_drawObject(context, scene, obj)
 	if (typeof obj !== "object") {console.log(typeof obj);}
 	
 	var units = thebeast_getSetting("units");
-	if (obj.type === "theBeast")
+	var playerType = thebeast_getObjectType("theBeast");
+	var box1Type = thebeast_getObjectType("box1");
+	var tree1Type = thebeast_getObjectType("tree1");
+	if (obj.type === playerType)
 	{
 		var image = null;
 		if (obj.dirY > 0) {image = thebeast_getImage("thebeast-front");}
@@ -446,12 +469,12 @@ function thebeast_drawObject(context, scene, obj)
 		else {image = thebeast_getImage("thebeast-left");}
 		context.drawImage(image, obj.x, obj.y, units, units);
 	}
-	else if (obj.type === "box1")
+	else if (obj.type === box1Type)
 	{
 		var image = thebeast_getImage("box1");
 		context.drawImage(image, obj.x, obj.y, units, units);
 	}
-	else if (obj.type === "tree1")
+	else if (obj.type === tree1Type)
 	{
 		// Detect cover with player.
 		var cover = thebeast_playerCover(scene.players, obj);
@@ -619,6 +642,8 @@ function thebeast_collision(scene)
 	var playerOffset = thebeast_getSetting("playerCollisionOffset");
 	var treeOffset = thebeast_getSetting("treeCollisionOffset");
 	var box1Offset = thebeast_getSetting("box1CollisionOffset");
+	var box1Type = thebeast_getObjectType("box1");
+	var tree1Type = thebeast_getObjectType("tree1");
 	var objOffset = null;
 	for (var i = 0; i < n; i++)
 	{
@@ -626,11 +651,11 @@ function thebeast_collision(scene)
 		for (var j = 0; j < m; j++)
 		{
 			var obj = objects[j];
-			if (obj.type === "tree1")
+			if (obj.type === tree1Type)
 			{
 				objOffset = treeOffset;
 			}
-			else if (obj.type === "box1")
+			else if (obj.type === box1Type)
 			{
 				objOffset = box1Offset;
 			}
