@@ -7,48 +7,51 @@
  * @link    http://www.github.com/bvssvni/thebeast
  *
  */
- 
+
+// These settings are set once and not modified during the game.
 var thebeast_settings = {
-	"boxId": "box",
-	"moveInterval": 10,
-	"renderInterval": 25,
-	"playerColor": [0, 0, 255, 255],
-	"box1Color": [255, 0, 0, 255],
-	"tree1Color": [0, 255, 0, 255],
-	"units": 32,
-	"cameraSpeed": 10,
-	"playerMaxSpeed": 0.03125,
-	"playerAcceleration": 0.5,
-	"playerCollisionOffset": [0.25, 0.8, 0.25, 0],
-	"treeCollisionOffset": [0.4, 0.8, 0.4, 0],
-	"box1CollisionOffset": [0, 0, 0, 0],
+	boxId: "box",
+	moveInterval: 10,
+	renderInterval: 25,
+	playerColor: [0, 0, 255, 255],
+	box1Color: [255, 0, 0, 255],
+	tree1Color: [0, 255, 0, 255],
+	units: 32,
+	cameraSpeed: 10,
+	playerMaxSpeed: 0.03125,
+	playerAcceleration: 0.5,
+	playerCollisionOffset: [0.25, 0.8, 0.25, 0],
+	treeCollisionOffset: [0.4, 0.8, 0.4, 0],
+	box1CollisionOffset: [0, 0, 0, 0],
+	// These images are set once through loading.
+	images: null,
+	imageSources: {
+		"thebeast-front": "./images/thebeast-front.png",
+		"thebeast-back": "./images/thebeast-back.png",
+		"thebeast-left": "./images/thebeast-left.png",
+		"thebeast-right": "./images/thebeast-right.png",
+		"box1": "./images/box1.png",
+		"tree1": "./images/tree1.png",
+	},
+	keyboardConfig: {
+		37: "playerTwo-left",
+		38: "playerTwo-up",
+		39: "playerTwo-right",
+		40: "playerTwo-down",
+		65: "playerOne-left",
+		68: "playerOne-right",
+		83: "playerOne-down",
+		87: "playerOne-up",
+	},
+	objectTypes: {
+		box1: true,
+		tree1: true,
+		theBeast: true,
+	},
 };
-// These images are set once through loading.
-var thebeast_images = null;
-var thebeast_image_sources = {
-	"thebeast-front": "./images/thebeast-front.png",
-	"thebeast-back": "./images/thebeast-back.png",
-	"thebeast-left": "./images/thebeast-left.png",
-	"thebeast-right": "./images/thebeast-right.png",
-	"box1": "./images/box1.png",
-	"tree1": "./images/tree1.png",
-};
-var thebeast_keyboardConfig = {
-	37: "playerTwo-left",
-	38: "playerTwo-up",
-	39: "playerTwo-right",
-	40: "playerTwo-down",
-	65: "playerOne-left",
-	68: "playerOne-right",
-	83: "playerOne-down",
-	87: "playerOne-up",
-};
+
+// Contains which keys are pressed at the keyboard.
 var thebeast_keyboardState = {};
-var thebeast_objectTypes = {
-	box1: true,
-	tree1: true,
-	theBeast: true,
-};
 
 // These are actions that can be performed on objects.
 // An action returns true when it is completed.
@@ -146,7 +149,7 @@ var thebeast_actions = {
 
 function thebeast_getObjectType(str)
 {
-	var type = thebeast_objectTypes[str];
+	var type = thebeast_settings.objectTypes[str];
 	if (type !== true)
 	{
 		console.log("Could not find type " + str + " listed in object types");
@@ -169,7 +172,7 @@ function thebeast_getSetting(id)
 
 function thebeast_getImage(id)
 {
-	var image = thebeast_images[id];
+	var image = thebeast_settings.images[id];
 	if (image === null)
 	{
 		console.log("Image " + id + " is not listed among images");
@@ -181,7 +184,7 @@ function thebeast_getImage(id)
 function thebeast_getKeyboardConfig(keyCode)
 {
 	if (typeof keyCode !== "number") {console.log(typeof keyCode);}
-	var config = thebeast_keyboardConfig[keyCode];
+	var config = thebeast_settings.keyboardConfig[keyCode];
 	if (config === null) {console.log("key code " + keyCode + " not listed in keyboard configuration");}
 	return config;
 }
@@ -803,7 +806,7 @@ function thebeast_load(scene)
 {
 	if (typeof scene !== "object") {console.log(typeof scene);}
 
-	var imageSources = thebeast_image_sources;
+	var imageSources = thebeast_settings.imageSources;
 	thebeast_loadImages({"map": scene.map}, function(images) {
 		var map = images.map;
 		thebeast_loadMap(scene, map);
@@ -811,7 +814,7 @@ function thebeast_load(scene)
 		thebeast_updateSceneState(scene);
 	});
 	thebeast_loadImages(imageSources, function(images) {
-		thebeast_images = images;
+		thebeast_settings.images = images;
 		scene.loadedImages = true;
 		thebeast_updateSceneState(scene);
 	});
