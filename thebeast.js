@@ -245,6 +245,60 @@ function thebeast_compareColors(a, b)
 		a[3] === b[3];
 }
 
+function thebeast_addObjectToScene(scene, obj)
+{
+	if (typeof scene !== "object") {console.log(typeof scene);}
+	if (typeof obj !== "object") {console.log(typeof obj);}
+
+	var playerObjectType = thebeast_getObjectType("theBeast");
+	var box1ObjectType = thebeast_getObjectType("box1");
+	var tree1ObjectType = thebeast_getObjectType("tree1");
+	var units = thebeast_getSetting("units");
+	var playerMaxSpeed = thebeast_getSetting("playerMaxSpeed") * units;
+	var playerAcceleration = thebeast_getSetting("playerAcceleration");
+		
+	if (obj.type === playerObjectType)
+	{
+		var player = obj;
+	
+		// Move object with keyboard.
+		player.idle = function() {
+			var vx = player.leftRight;
+			var vy = player.upDown;
+			var v = Math.sqrt(vx * vx + vy * vy) / playerMaxSpeed;
+			vx = v === 0 ? 0 : vx / v;
+			vy = v === 0 ? 0 : vy / v;
+			player.vx += playerAcceleration * (vx - player.vx);
+			player.vy += playerAcceleration * (vy - player.vy);
+		};
+		
+		scene.players.push(player);
+	}
+	else if (obj.type === box1ObjectType)
+	{
+		scene.objects.push(obj);
+	}
+	else if (obj.type === tree1ObjectType)
+	{
+		scene.objects.push(obj);
+	}
+}
+
+function thebeast_objectTypeFromColor(color)
+{
+	var box1Color = thebeast_getSetting("box1Color");
+	var playerColor = thebeast_getSetting("playerColor");
+	var tree1Color = thebeast_getSetting("tree1Color");
+	var box1Type = thebeast_getObjectType("box1");
+	var tree1Type = thebeast_getObjectType("tree1");
+	var playerType = thebeast_getObjectType("theBeast");
+	if (thebeast_compareColors([0, 0, 0, 0], color)) {return null;}
+	else if (thebeast_compareColors(box1Color, color)) {return box1Type;}
+	else if (thebeast_compareColors(playerColor, color)) {return playerType;}
+	else if (thebeast_compareColors(tree1Color, color)) {return tree1Type;}
+	else {console.log("Unknown color [" + color[0] + "," + color[1] + "," + color[2] + "," + color[3] + "]");}
+}
+
 function thebeast_loadMap(scene, map)
 {
 	if (typeof scene !== "object") {console.log(typeof scene);}
@@ -265,46 +319,17 @@ function thebeast_loadMap(scene, map)
 	var data = context.getImageData(0, 0, w, h).data;
 	if (typeof data !== "object") {console.log(typeof data);}
 	
-	var box1Color = thebeast_getSetting("box1Color");
-	var playerColor = thebeast_getSetting("playerColor");
-	var tree1Color = thebeast_getSetting("tree1Color");
-	var box1Type = thebeast_getObjectType("box1");
-	var tree1Type = thebeast_getObjectType("tree1");
-	var playerType = thebeast_getObjectType("theBeast");
 	var units = thebeast_getSetting("units");
-	var playerMaxSpeed = thebeast_getSetting("playerMaxSpeed") * units;
-	var playerAcceleration = thebeast_getSetting("playerAcceleration");
 	for (var x = 0; x < w; x++)
 	{
 		for (var y = 0; y < h; y++)
 		{
 			var i = x + w * y;
 			var color = [data[i*4+0], data[i*4+1], data[i*4+2], data[i*4+3]];
-			if (thebeast_compareColors(box1Color, color))
-			{
-				scene.objects.push(thebeast_newObject(box1Type, x * units, y * units, 0, 0));
-			}
-			else if (thebeast_compareColors(playerColor, color))
-			{
-				var player = thebeast_newObject(playerType, x * units, y * units, 0, 0);
-				
-				// Move player with keyboard.
-				player.idle = function() {
-					var vx = player.leftRight;
-					var vy = player.upDown;
-					var v = Math.sqrt(vx * vx + vy * vy) / playerMaxSpeed;
-					vx = v === 0 ? 0 : vx / v;
-					vy = v === 0 ? 0 : vy / v;
-					player.vx += playerAcceleration * (vx - player.vx);
-					player.vy += playerAcceleration * (vy - player.vy);
-				};
-				
-				scene.players.push(player);
-			}
-			else if (thebeast_compareColors(tree1Color, color))
-			{
-				scene.objects.push(thebeast_newObject(tree1Type, x * units, y * units, 0, 0));
-			}
+			var type = thebeast_objectTypeFromColor(color);
+			if (type === null) {continue;}
+			var obj = thebeast_newObject(type, x * units, y * units, 0, 0);
+			thebeast_addObjectToScene(scene, obj);
 		}
 	}
 	
